@@ -13,7 +13,7 @@ public:
     ~CandleAudioProcessor() override = default;
 
     void prepareToPlay  (double sampleRate, int samplesPerBlock) override;
-    void releaseResources() override {}
+    void releaseResources() override;
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
 
@@ -52,6 +52,8 @@ private:
     MicStage     mic;
     CassetteTape tape;
     juce::SmoothedValue<float> outputGainSmooth;
+    juce::AudioBuffer<float> safetyDryBuffer;
+    bool wasBypassed = false;
 
     std::atomic<float> inputMeterDb  { -100.0f };
     std::atomic<float> outputMeterDb { -100.0f };

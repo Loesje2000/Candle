@@ -32,6 +32,7 @@ public:
 private:
     void updateFilters (const Parameters& p);
     void resetState();
+    bool sanitizeSample (float& left, float& right) noexcept;
 
     static float saturate (float x, float drive) noexcept;
     float readDelay (const std::vector<float>& buf, int writePos, float delaySamples) const noexcept;
@@ -74,6 +75,9 @@ private:
     // DC blocking
     float dcBlockL = 0.0f, dcBlockR = 0.0f;
 
+    // Head wear HF loss filter state
+    float ageLPL = 0.0f, ageLPR = 0.0f;
+
     // Dropout state
     float dropoutTimer = 0.0f;
     float dropoutGain  = 1.0f;
@@ -93,6 +97,7 @@ private:
     float lastEqHigh = 0.0f, lastEqLow = 0.0f;
 
     juce::Random random;
+    bool prepared = false;
 
     // IEC Type I ferric record/playback equalization
     juce::dsp::IIR::Filter<float> iecRecordEQ[2];    // pre-saturation high-shelf boost

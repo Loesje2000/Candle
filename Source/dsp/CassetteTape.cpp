@@ -33,9 +33,9 @@ void CassetteTape::prepare (const juce::dsp::ProcessSpec& spec)
     ptWritePos = 0;
 
     // Room early-reflection taps (small bedroom: ~8, 14, 21 ms)
-    roomTap1 = static_cast<int> (0.008 * sampleRate);
-    roomTap2 = static_cast<int> (0.014 * sampleRate);
-    roomTap3 = static_cast<int> (0.021 * sampleRate);
+    roomTap1 = juce::jlimit (1, kRoomSize - 1, static_cast<int> (0.008 * sampleRate));
+    roomTap2 = juce::jlimit (1, kRoomSize - 1, static_cast<int> (0.014 * sampleRate));
+    roomTap3 = juce::jlimit (1, kRoomSize - 1, static_cast<int> (0.021 * sampleRate));
     roomBufL.assign (kRoomSize, 0.0f);
     roomBufR.assign (kRoomSize, 0.0f);
     roomWritePos = 0;
@@ -47,6 +47,7 @@ void CassetteTape::prepare (const juce::dsp::ProcessSpec& spec)
     noiseSmoothed.setCurrentAndTargetValue (0.5f);
     wowSmoothed.setCurrentAndTargetValue   (0.3f);
     resetState();
+    prepared = true;
 }
 
 void CassetteTape::reset() { resetState(); }
@@ -62,6 +63,7 @@ void CassetteTape::resetState()
     noiseLPL = noiseLPR = noiseHPL = noiseHPR = 0.0f;
     crosstalkLPL = crosstalkLPR = 0.0f;
     dcBlockL = dcBlockR = 0.0f;
+    ageLPL = ageLPR = 0.0f;
     // Start both trackers at reference power so encode/decode open at unity gain
     dbxEncRmsL = dbxEncRmsR = 0.10f;
     dbxDecRmsL = dbxDecRmsR = 0.10f;
@@ -162,8 +164,44 @@ float CassetteTape::readDelay (const std::vector<float>& buf, int writePos, floa
     return buf[static_cast<size_t> (p0)] * (1.0f - fr) + buf[static_cast<size_t> (p1)] * fr;
 }
 
+bool CassetteTape::sanitizeSample (float& left, float& right) noexcept
+{
+    constexpr float kMax = 1.25f;
+    bool invalid = false;
+    bool changed = false;
+
+    if (! std::isfinite (left))  { left = 0.0f;  invalid = true; changed = true; }
+    if (! std::isfinite (right)) { right = 0.0f; invalid = true; changed = true; }
+
+    const float cl = juce::jlimit (-kMax, kMax, left);
+    const float cr = juce::jlimit (-kMax, kMax, right);
+    changed = changed || cl != left || cr != right;
+    left = cl;
+    right = cr;
+
+    if (invalid)
+    {
+        dcBlockL = dcBlockR = 0.0f;
+        crosstalkLPL = crosstalkLPR = 0.0f;
+        noiseLPL = noiseLPR = noiseHPL = noiseHPR = 0.0f;
+        dbxEncRmsL = dbxEncRmsR = 0.10f;
+        dbxDecRmsL = dbxDecRmsR = 0.10f;
+    }
+
+    return changed;
+}
+
 void CassetteTape::process (juce::AudioBuffer<float>& buffer, const Parameters& p)
 {
+    if (! prepared)
+        return;
+
+    if (delayBufL.size() != kDelaySize || delayBufR.size() != kDelaySize
+        || roomBufL.size() != kRoomSize || roomBufR.size() != kRoomSize)
+    {
+        resetState();
+    }
+
     updateFilters (p);
 
     satSmoothed.setTargetValue   (p.saturation);
@@ -222,7 +260,6 @@ void CassetteTape::process (juce::AudioBuffer<float>& buffer, const Parameters& 
     // Head wear HF loss
     const float ageLPHz = 18000.0f - p.age * 8000.0f;
     const float ageLPC  = (twoPi * ageLPHz / sr) / (1.0f + twoPi * ageLPHz / sr);
-    float ageHPL = 0.0f, ageHPR = 0.0f; // per-block state (alias ok)
 
     // Print-through: post-echo level scales with age
     const float ptAmt = 0.0030f * p.age; // ~–50 dBFS at age=1
@@ -277,6 +314,7 @@ void CassetteTape::process (juce::AudioBuffer<float>& buffer, const Parameters& 
         const float drive      = 1.0f + sat * 3.0f * driveBoost;
         inL = saturate (inL, drive);
         inR = saturate (inR, drive);
+        sanitizeSample (inL, inR);
 
         // ── 3b. Write to print-through buffer (captures tape record signal) ──
         if (ptBufLen > 0)
@@ -288,11 +326,12 @@ void CassetteTape::process (juce::AudioBuffer<float>& buffer, const Parameters& 
         // ── 4. Speed EQ (tape bandwidth) ─────────────────────────────────────
         inL = speedLPF[0].processSample (speedHPF[0].processSample (inL));
         inR = speedLPF[1].processSample (speedHPF[1].processSample (inR));
+        sanitizeSample (inL, inR);
 
         // ── 4b. Head wear HF loss ─────────────────────────────────────────────
-        ageHPL += ageLPC * (inL - ageHPL);
-        ageHPR += ageLPC * (inR - ageHPR);
-        if (p.age > 0.01f) { inL = ageHPL; inR = ageHPR; }
+        ageLPL += ageLPC * (inL - ageLPL);
+        ageLPR += ageLPC * (inR - ageLPR);
+        if (p.age > 0.01f) { inL = ageLPL; inR = ageLPR; }
 
         // ── 5. Write into wow/flutter delay line ──────────────────────────────
         delayBufL[static_cast<size_t> (delayWritePos)] = inL;
@@ -434,6 +473,7 @@ void CassetteTape::process (juce::AudioBuffer<float>& buffer, const Parameters& 
         }
         roomWritePos = (roomWritePos + 1) % kRoomSize;
 
+        sanitizeSample (inL, inR);
         L[i] = inL;
         R[i] = inR;
     }

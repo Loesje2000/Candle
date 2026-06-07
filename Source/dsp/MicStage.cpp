@@ -22,6 +22,7 @@ void MicStage::prepare (const juce::dsp::ProcessSpec& spec)
         cableLP[ch].prepare (spec); *cableLP[ch].coefficients = *cableCoeffs;
     }
     reset();
+    prepared = true;
 }
 
 void MicStage::reset()
@@ -38,7 +39,7 @@ void MicStage::reset()
 
 void MicStage::process (juce::AudioBuffer<float>& buffer, const Parameters& p)
 {
-    if (! p.enabled) return;
+    if (! p.enabled || ! prepared) return;
 
     const int   numSamples = buffer.getNumSamples();
     const float sr         = static_cast<float> (sampleRate);

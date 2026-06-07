@@ -18,6 +18,8 @@ constexpr const char* outputGain  = "output_gain";
 constexpr const char* globalBypass = "global_bypass";
 }
 
+static constexpr bool kDiagnosticBypassTapeDsp = true;
+
 static juce::AudioProcessorValueTreeState::ParameterLayout makeLayout()
 {
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> p;
@@ -109,6 +111,15 @@ void CandleAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock
     tape.prepare (spec);
     outputGainSmooth.reset (sampleRate, 0.02);
     outputGainSmooth.setCurrentAndTargetValue (1.0f);
+    safetyDryBuffer.setSize (2, samplesPerBlock, false, false, true);
+    wasBypassed = false;
+}
+
+void CandleAudioProcessor::releaseResources()
+{
+    mic.reset();
+    tape.reset();
+    wasBypassed = false;
 }
 
 bool CandleAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
@@ -131,10 +142,24 @@ void CandleAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     inputMeterDb.store (juce::Decibels::gainToDecibels (
         juce::jmax (getStereoRms (buffer), 1.0e-6f), -100.0f));
 
-    if (get (ParamID::globalBypass) > 0.5f)
+    safetyDryBuffer.setSize (2, buffer.getNumSamples(), false, false, true);
+    safetyDryBuffer.copyFrom (0, 0, buffer, 0, 0, buffer.getNumSamples());
+    safetyDryBuffer.copyFrom (1, 0, buffer, 1, 0, buffer.getNumSamples());
+
+    const bool bypassed = get (ParamID::globalBypass) > 0.5f;
+    if (bypassed)
     {
         outputMeterDb.store (inputMeterDb.load());
+        wasBypassed = true;
         return;
+    }
+
+    if (wasBypassed)
+    {
+        mic.reset();
+        tape.reset();
+        outputGainSmooth.setCurrentAndTargetValue (juce::Decibels::decibelsToGain (get (ParamID::outputGain)));
+        wasBypassed = false;
     }
 
     mic.process (buffer, MicStage::Parameters { get (ParamID::micOn) > 0.5f });
@@ -151,8 +176,13 @@ void CandleAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     p.age         = get (ParamID::age);
     p.generations = static_cast<int> (get (ParamID::generations) + 0.5f);
 
-    tape.process (buffer, p);
-    sanitizeAudio (buffer);
+    if (! kDiagnosticBypassTapeDsp)
+        tape.process (buffer, p);
+
+    if (sanitizeAudio (buffer))
+    {
+        tape.reset();
+    }
 
     // Output gain
     outputGainSmooth.setTargetValue (juce::Decibels::decibelsToGain (get (ParamID::outputGain)));
@@ -164,7 +194,10 @@ void CandleAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
         L[i] *= g;
         R[i] *= g;
     }
-    sanitizeAudio (buffer);
+    if (sanitizeAudio (buffer))
+    {
+        tape.reset();
+    }
 
     outputMeterDb.store (juce::Decibels::gainToDecibels (
         juce::jmax (getStereoRms (buffer), 1.0e-6f), -100.0f));
@@ -202,7 +235,7 @@ float CandleAudioProcessor::getStereoRms (const juce::AudioBuffer<float>& buf) c
 bool CandleAudioProcessor::sanitizeAudio (juce::AudioBuffer<float>& buf) noexcept
 {
     bool changed = false;
-    constexpr float kMax = 4.0f;
+    constexpr float kMax = 0.98f;
     for (int ch = 0; ch < juce::jmin (2, buf.getNumChannels()); ++ch)
     {
         auto* data = buf.getWritePointer (ch);
