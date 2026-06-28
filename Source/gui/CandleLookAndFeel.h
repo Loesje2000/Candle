@@ -80,6 +80,7 @@ public:
     void drawComboBox         (juce::Graphics&, int w, int h, bool,
                                int ax, int ay, int aw, int ah, juce::ComboBox&) override;
     void positionComboBoxText (juce::ComboBox&, juce::Label&) override;
+    juce::PopupMenu::Options getOptionsForComboBoxPopupMenu (juce::ComboBox&, juce::Label&) override;
 
     void drawPopupMenuBackground (juce::Graphics&, int w, int h) override;
     void drawPopupMenuItem       (juce::Graphics&, const juce::Rectangle<int>&,

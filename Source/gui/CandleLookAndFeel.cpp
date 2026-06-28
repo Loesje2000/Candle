@@ -143,6 +143,14 @@ void CandleLookAndFeel::positionComboBoxText (juce::ComboBox& box, juce::Label& 
 }
 
 // ── Popup menu ───────────────────────────────────────────────────────────────
+
+juce::PopupMenu::Options CandleLookAndFeel::getOptionsForComboBoxPopupMenu (juce::ComboBox& box,
+                                                                        juce::Label& label)
+{
+    return juce::LookAndFeel_V4::getOptionsForComboBoxPopupMenu (box, label)
+        .withParentComponent (box.getTopLevelComponent());
+}
+
 void CandleLookAndFeel::drawPopupMenuBackground (juce::Graphics& g, int w, int h)
 {
     g.setColour (CandleColours::bg);
