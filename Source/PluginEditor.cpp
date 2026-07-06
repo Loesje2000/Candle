@@ -264,6 +264,11 @@ void CandleAudioProcessorEditor::drawHeader (juce::Graphics& g, juce::Rectangle<
     g.setColour (CandleColours::creamDim);
     g.drawText ("PORTASTUDIO  424", 23, 35, 150, 14, juce::Justification::centredLeft);
 
+    g.setFont (lookAndFeel.getMonoFont (7.0f));
+    g.setColour (CandleColours::creamDim.withAlpha (0.78f));
+    g.drawText ("v" JucePlugin_VersionString "  qa-20260707",
+                616, 35, 58, 12, juce::Justification::centredRight);
+
     // ── Cassette window (center of header) ────────────────────────────────
     drawCassetteWindow (g, { 178.0f, 4.0f, 204.0f, 46.0f });
 
