@@ -75,6 +75,31 @@ CandleAudioProcessorEditor::CandleAudioProcessorEditor (CandleAudioProcessor& p)
     };
     root.addAndMakeVisible (presetCombo);
 
+    // ── Tooltips ─────────────────────────────────────────────────────────
+    knobTrim->setTooltip   ("Input trim — set recording level before the tape chain (±20 dB)");
+    knobEqHigh->setTooltip ("Mixer high shelf — boosts or cuts above 10 kHz before tape (±10 dB)");
+    knobEqLow->setTooltip  ("Mixer low shelf — boosts or cuts below 100 Hz before tape (±10 dB)");
+    micButton.setTooltip   ("RadioShack Realistic mic emulation — shapes tone like the cheap "
+                            "dynamic mic Elliott Smith used for vocals on Roman Candle");
+    dbxButton.setTooltip   ("DBX Type II noise reduction — on = quieter hiss, off = raw open-reel "
+                            "noise floor (Smith often bypassed or had a faulty DBX)");
+    speedCombo.setTooltip  ("Tape speed — HIGH (3¾ ips) is cleanest, NORM (1⅞ ips) is the Roman "
+                            "Candle speed, SLOW (15/16 ips) is maximum degradation");
+    genCombo.setTooltip    ("Bounce generations — each ping-pong overdub adds noise and rolls off "
+                            "high frequencies, as on multi-tracked cassette recordings");
+    knobSat->setTooltip    ("Tape saturation — how hard the ferric oxide is driven; adds "
+                            "2nd-harmonic warmth and soft limiting");
+    knobNoise->setTooltip  ("Tape hiss + AC hum level — at zero the noise floor is fully suppressed; "
+                            "Roman Candle preset sits around 55%");
+    knobWow->setTooltip    ("Wow & flutter — slow pitch drift (wow) and fast capstan wobble (flutter) "
+                            "from the 424's transport mechanism");
+    knobAge->setTooltip    ("Head wear — increases HF loss, dropout frequency, and print-through "
+                            "post-echo; simulates a heavily used transport");
+    knobOutput->setTooltip ("Output level after the full tape chain (±12 dB)");
+    bypassButton.setTooltip ("Bypass the entire tape chain — dry signal passes through unchanged");
+    presetCombo.setTooltip  ("Factory presets — Roman Candle, Portastudio, Bounce x3, Late Night, "
+                             "New Tape");
+
     // ── Resizer ──────────────────────────────────────────────────────────
     constrainer.setSizeLimits (546, 252, 1170, 540);
     constrainer.setFixedAspectRatio (780.0 / 360.0);

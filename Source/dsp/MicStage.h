@@ -33,4 +33,5 @@ private:
     float noiseLP_L = 0.0f, noiseLP_R = 0.0f;
 
     juce::Random random;
+    bool prepared = false;
 };

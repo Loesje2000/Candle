@@ -109,6 +109,14 @@ void CandleAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock
     tape.prepare (spec);
     outputGainSmooth.reset (sampleRate, 0.02);
     outputGainSmooth.setCurrentAndTargetValue (1.0f);
+    wasBypassed = false;
+}
+
+void CandleAudioProcessor::releaseResources()
+{
+    mic.reset();
+    tape.reset();
+    wasBypassed = false;
 }
 
 bool CandleAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
@@ -131,10 +139,20 @@ void CandleAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     inputMeterDb.store (juce::Decibels::gainToDecibels (
         juce::jmax (getStereoRms (buffer), 1.0e-6f), -100.0f));
 
-    if (get (ParamID::globalBypass) > 0.5f)
+    const bool bypassed = get (ParamID::globalBypass) > 0.5f;
+    if (bypassed)
     {
         outputMeterDb.store (inputMeterDb.load());
+        wasBypassed = true;
         return;
+    }
+
+    if (wasBypassed)
+    {
+        mic.reset();
+        tape.reset();
+        outputGainSmooth.setCurrentAndTargetValue (juce::Decibels::decibelsToGain (get (ParamID::outputGain)));
+        wasBypassed = false;
     }
 
     mic.process (buffer, MicStage::Parameters { get (ParamID::micOn) > 0.5f });
@@ -152,7 +170,8 @@ void CandleAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     p.generations = static_cast<int> (get (ParamID::generations) + 0.5f);
 
     tape.process (buffer, p);
-    sanitizeAudio (buffer);
+    if (sanitizeAudio (buffer))
+        tape.reset();
 
     // Output gain
     outputGainSmooth.setTargetValue (juce::Decibels::decibelsToGain (get (ParamID::outputGain)));
@@ -164,7 +183,8 @@ void CandleAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
         L[i] *= g;
         R[i] *= g;
     }
-    sanitizeAudio (buffer);
+    if (sanitizeAudio (buffer))
+        tape.reset();
 
     outputMeterDb.store (juce::Decibels::gainToDecibels (
         juce::jmax (getStereoRms (buffer), 1.0e-6f), -100.0f));

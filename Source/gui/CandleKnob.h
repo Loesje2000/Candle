@@ -15,6 +15,7 @@ public:
 
     void resized() override;
     void paint (juce::Graphics&) override;
+    void setTooltip (const juce::String& tip) { slider.setTooltip (tip); }
 
 private:
     juce::Slider slider;
