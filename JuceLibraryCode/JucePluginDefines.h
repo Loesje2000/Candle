@@ -44,7 +44,7 @@
  #define JucePlugin_Name                   "Candle"
 #endif
 #ifndef  JucePlugin_Desc
- #define JucePlugin_Desc                   "Portastudio 424 cassette processor"
+ #define JucePlugin_Desc                   "Porta 424 cassette processor"
 #endif
 #ifndef  JucePlugin_Manufacturer
  #define JucePlugin_Manufacturer           "Rubblesonic"

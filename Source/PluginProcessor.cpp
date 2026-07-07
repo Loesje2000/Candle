@@ -109,6 +109,7 @@ void CandleAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock
     tape.prepare (spec);
     outputGainSmooth.reset (sampleRate, 0.02);
     outputGainSmooth.setCurrentAndTargetValue (1.0f);
+    drySafetyBuffer.setSize (2, samplesPerBlock, false, false, true);
     wasBypassed = false;
 }
 
@@ -121,8 +122,15 @@ void CandleAudioProcessor::releaseResources()
 
 bool CandleAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
-    return layouts.getMainInputChannelSet()  == juce::AudioChannelSet::stereo()
-        && layouts.getMainOutputChannelSet() == juce::AudioChannelSet::stereo();
+    const auto input  = layouts.getMainInputChannelSet();
+    const auto output = layouts.getMainOutputChannelSet();
+
+    const bool inputOk  = input == juce::AudioChannelSet::mono()
+                       || input == juce::AudioChannelSet::stereo();
+    const bool outputOk = output == juce::AudioChannelSet::mono()
+                       || output == juce::AudioChannelSet::stereo();
+
+    return inputOk && outputOk && output.size() >= input.size();
 }
 
 void CandleAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer&)
@@ -131,13 +139,28 @@ void CandleAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     const int inCh  = getTotalNumInputChannels();
     const int outCh = getTotalNumOutputChannels();
     for (int ch = inCh; ch < outCh; ++ch) buffer.clear (ch, 0, buffer.getNumSamples());
-    if (buffer.getNumChannels() < 2) return;
+    if (buffer.getNumChannels() == 0) return;
+
+    if (inCh == 1 && outCh >= 2 && buffer.getNumChannels() >= 2)
+        buffer.copyFrom (1, 0, buffer, 0, 0, buffer.getNumSamples());
 
     auto get = [this] (const char* id) { return apvts.getRawParameterValue (id)->load(); };
 
     sanitizeAudio (buffer);
+    const float inputRms = getStereoRms (buffer);
     inputMeterDb.store (juce::Decibels::gainToDecibels (
-        juce::jmax (getStereoRms (buffer), 1.0e-6f), -100.0f));
+        juce::jmax (inputRms, 1.0e-6f), -100.0f));
+
+    drySafetyBuffer.setSize (juce::jmin (2, buffer.getNumChannels()), buffer.getNumSamples(),
+                             false, false, true);
+    for (int ch = 0; ch < drySafetyBuffer.getNumChannels(); ++ch)
+        drySafetyBuffer.copyFrom (ch, 0, buffer, ch, 0, buffer.getNumSamples());
+
+    if (buffer.getNumChannels() < 2)
+    {
+        outputMeterDb.store (inputMeterDb.load());
+        return;
+    }
 
     const bool bypassed = get (ParamID::globalBypass) > 0.5f;
     if (bypassed)
@@ -186,8 +209,16 @@ void CandleAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     if (sanitizeAudio (buffer))
         tape.reset();
 
+    float outputRms = getStereoRms (buffer);
+    if (inputRms > 3.0e-4f && outputRms < 1.0e-5f)
+    {
+        for (int ch = 0; ch < drySafetyBuffer.getNumChannels(); ++ch)
+            buffer.copyFrom (ch, 0, drySafetyBuffer, ch, 0, buffer.getNumSamples());
+        outputRms = getStereoRms (buffer);
+    }
+
     outputMeterDb.store (juce::Decibels::gainToDecibels (
-        juce::jmax (getStereoRms (buffer), 1.0e-6f), -100.0f));
+        juce::jmax (outputRms, 1.0e-6f), -100.0f));
 }
 
 juce::AudioProcessorEditor* CandleAudioProcessor::createEditor()
@@ -211,12 +242,16 @@ void CandleAudioProcessor::setStateInformation (const void* data, int sizeInByte
 float CandleAudioProcessor::getStereoRms (const juce::AudioBuffer<float>& buf) const noexcept
 {
     const int n = buf.getNumSamples();
-    if (n <= 0 || buf.getNumChannels() < 2) return 0.0f;
-    const auto* L = buf.getReadPointer (0);
-    const auto* R = buf.getReadPointer (1);
+    const int channels = juce::jmin (2, buf.getNumChannels());
+    if (n <= 0 || channels <= 0) return 0.0f;
     double sum = 0.0;
-    for (int i = 0; i < n; ++i) sum += static_cast<double> (L[i])*L[i] + static_cast<double> (R[i])*R[i];
-    return std::sqrt (static_cast<float> (sum / static_cast<double> (n * 2)));
+    for (int ch = 0; ch < channels; ++ch)
+    {
+        const auto* data = buf.getReadPointer (ch);
+        for (int i = 0; i < n; ++i)
+            sum += static_cast<double> (data[i]) * data[i];
+    }
+    return std::sqrt (static_cast<float> (sum / static_cast<double> (n * channels)));
 }
 
 bool CandleAudioProcessor::sanitizeAudio (juce::AudioBuffer<float>& buf) noexcept
@@ -242,7 +277,7 @@ bool CandleAudioProcessor::sanitizeAudio (juce::AudioBuffer<float>& buf) noexcep
 
 juce::StringArray CandleAudioProcessor::getPresetNames() const
 {
-    return { "Roman Candle", "Portastudio", "Bounce x3", "Late Night", "New Tape" };
+    return { "Candle", "Porta", "Bounce x3", "Late Night", "New Tape" };
 }
 
 void CandleAudioProcessor::applyFactoryPreset (int index)
@@ -265,14 +300,14 @@ void CandleAudioProcessor::applyFactoryPreset (int index)
 
     switch (index)
     {
-        case 0: // Roman Candle: DBX off, NORM speed — noisy but not warbling
+        case 0: // Candle: DBX off, NORM speed — noisy but not warbling
             set (ParamID::dbx, 0.0f);        set (ParamID::tapeSpeed, 1.0f);
             set (ParamID::saturation, 0.45f); set (ParamID::noise, 0.55f);
             set (ParamID::wowFlutter, 0.30f); set (ParamID::age, 0.30f);
             set (ParamID::generations, 1.0f); set (ParamID::eqLow, -1.5f);
             set (ParamID::micOn, 1.0f);
             break;
-        case 1: // Portastudio: DBX on, HIGH speed, clean cassette
+        case 1: // Porta: DBX on, HIGH speed, clean cassette
             set (ParamID::tapeSpeed, 0.0f);   set (ParamID::saturation, 0.3f);
             set (ParamID::noise, 0.35f);       set (ParamID::wowFlutter, 0.20f);
             break;
@@ -293,6 +328,56 @@ void CandleAudioProcessor::applyFactoryPreset (int index)
             break;
         default: break;
     }
+}
+
+juce::File CandleAudioProcessor::getUserPresetDirectory() const
+{
+    auto dir = juce::File::getSpecialLocation (juce::File::userApplicationDataDirectory)
+                   .getChildFile ("Rubblesonic").getChildFile ("Candle").getChildFile ("Presets");
+    dir.createDirectory();
+    return dir;
+}
+
+juce::StringArray CandleAudioProcessor::getUserPresetNames() const
+{
+    juce::StringArray names;
+    for (const auto& file : getUserPresetDirectory().findChildFiles (juce::File::findFiles, false, "*.xml"))
+        if (auto xml = juce::XmlDocument::parse (file))
+            names.add (xml->getStringAttribute ("presetName", file.getFileNameWithoutExtension()));
+    names.sort (true);
+    return names;
+}
+
+bool CandleAudioProcessor::saveUserPreset (const juce::String& name)
+{
+    const auto trimmed = name.trim();
+    if (trimmed.isEmpty())
+        return false;
+
+    auto xml = apvts.copyState().createXml();
+    if (xml == nullptr)
+        return false;
+
+    xml->setAttribute ("presetName", trimmed);
+    const auto file = getUserPresetDirectory().getChildFile (juce::File::createLegalFileName (trimmed) + ".xml");
+    return xml->writeTo (file);
+}
+
+bool CandleAudioProcessor::loadUserPresetByName (const juce::String& name)
+{
+    for (const auto& file : getUserPresetDirectory().findChildFiles (juce::File::findFiles, false, "*.xml"))
+    {
+        if (auto xml = juce::XmlDocument::parse (file))
+        {
+            const auto presetName = xml->getStringAttribute ("presetName", file.getFileNameWithoutExtension());
+            if (presetName == name && xml->hasTagName (apvts.state.getType()))
+            {
+                apvts.replaceState (juce::ValueTree::fromXml (*xml));
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() { return new CandleAudioProcessor(); }

@@ -2,7 +2,7 @@
 #include <JuceHeader.h>
 #include <vector>
 
-// Full signal chain for the Tascam Portastudio 424 cassette emulation.
+// Full signal chain for the Tascam Porta 424 cassette emulation.
 // Signal path: trim → mixer EQ → DBX encode → saturation → speed EQ
 //              → wow/flutter → noise → crosstalk → head bump → dropout
 //              → DBX decode → generation loss
@@ -64,6 +64,7 @@ private:
     float wowPhase1 = 0.0f, wowPhase2 = 0.0f, wowPhase3 = 0.0f;
     float flutterPhase1 = 0.0f, flutterPhase2 = 0.0f;
     float wowRateDrift = 0.0f;  // slow random walk on wow oscillator rate
+    float flutterNoiseState = 0.0f;
 
     // Noise shaping filter states (single-pole)
     float noiseLPL = 0.0f, noiseLPR = 0.0f;

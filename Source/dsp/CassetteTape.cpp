@@ -60,6 +60,7 @@ void CassetteTape::resetState()
     wowPhase1 = wowPhase2 = wowPhase3 = 0.0f;
     flutterPhase1 = flutterPhase2 = 0.0f;
     wowRateDrift = 0.0f;
+    flutterNoiseState = 0.0f;
     noiseLPL = noiseLPR = noiseHPL = noiseHPR = 0.0f;
     crosstalkLPL = crosstalkLPR = 0.0f;
     dcBlockL = dcBlockR = 0.0f;
@@ -219,17 +220,17 @@ void CassetteTape::process (juce::AudioBuffer<float>& buffer, const Parameters& 
     {
         case 0: // HIGH: 0.06% WRMS
             wowDepthSamples     = sr * 0.00085f;
-            flutterDepthSamples = sr * 0.00028f;
+            flutterDepthSamples = sr * 0.000010f;
             wowRate = 0.60f;
             break;
         case 2: // SLOW: 0.20% WRMS (estimated)
             wowDepthSamples     = sr * 0.00283f;
-            flutterDepthSamples = sr * 0.00085f;
+            flutterDepthSamples = sr * 0.000025f;
             wowRate = 0.45f;
             break;
         default: // NORM: 0.10% WRMS
             wowDepthSamples     = sr * 0.00141f;
-            flutterDepthSamples = sr * 0.00042f;
+            flutterDepthSamples = sr * 0.000015f;
             wowRate = 0.55f;
             break;
     }
@@ -354,10 +355,11 @@ void CassetteTape::process (juce::AudioBuffer<float>& buffer, const Parameters& 
         const float wowMod = std::sin (twoPi * wowPhase1) * wowDepthSamples * 1.0f
                            + std::sin (twoPi * wowPhase2) * wowDepthSamples * 0.4f
                            + std::sin (twoPi * wowPhase3 + 0.9f) * wowDepthSamples * 0.25f;
-        const float flutterNoise = random.nextFloat() * 2.0f - 1.0f;
+        const float flutterNoiseCoeff = 1.0f - std::exp (-1.0f / (0.012f * sr));
+        flutterNoiseState += flutterNoiseCoeff * ((random.nextFloat() * 2.0f - 1.0f) - flutterNoiseState);
         const float flutterMod  = (std::sin (twoPi * flutterPhase1)
                                   + 0.5f * std::sin (twoPi * flutterPhase2 + 1.3f)
-                                  + flutterNoise * 0.15f) * flutterDepthSamples;
+                                  + flutterNoiseState * 0.05f) * flutterDepthSamples;
 
         const float delaySamples = 256.0f + wowMod * wowAmt + flutterMod * wowAmt;
         inL = readDelay (delayBufL, delayWritePos, delaySamples);

@@ -5,6 +5,16 @@ static float dbToNorm (float db) noexcept
     return juce::jlimit (0.0f, 1.0f, (db + 60.0f) / 60.0f);
 }
 
+static std::unique_ptr<juce::PropertiesFile> makeTooltipSettings()
+{
+    juce::PropertiesFile::Options opts;
+    opts.applicationName     = "Settings";
+    opts.filenameSuffix      = "xml";
+    opts.folderName          = "Rubblesonic/Candle";
+    opts.osxLibrarySubFolder = "Application Support";
+    return std::make_unique<juce::PropertiesFile> (opts);
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 CandleAudioProcessorEditor::CandleAudioProcessorEditor (CandleAudioProcessor& p)
     : AudioProcessorEditor (&p), processor (p)
@@ -61,44 +71,91 @@ CandleAudioProcessorEditor::CandleAudioProcessorEditor (CandleAudioProcessor& p)
     bypassAtt = std::make_unique<BtnAtt> (processor.apvts, "global_bypass", bypassButton);
     root.addAndMakeVisible (bypassButton);
 
-    // ── Preset combo ──────────────────────────────────────────────────────
-    presetCombo.addItem ("load preset", 1);
-    const auto presets = processor.getPresetNames();
-    for (int i = 0; i < presets.size(); ++i)
-        presetCombo.addItem (presets[i], i + 2);
-    presetCombo.setSelectedId (1, juce::dontSendNotification);
+    // ── Preset combo + prev/next arrows ───────────────────────────────────
+    rebuildPresetList();
     presetCombo.onChange = [this]
     {
         const int sel = presetCombo.getSelectedId();
-        if (sel >= 2) processor.applyFactoryPreset (sel - 2);
-        presetCombo.setSelectedId (1, juce::dontSendNotification);
+        for (int i = 0; i < (int) presetEntries.size(); ++i)
+        {
+            if (presetEntries[(size_t) i].comboId == sel)
+            {
+                selectPresetEntry (i, true);
+                break;
+            }
+        }
     };
     root.addAndMakeVisible (presetCombo);
+
+    presetPrevButton.onClick = [this] { stepPreset (-1); };
+    presetNextButton.onClick = [this] { stepPreset (+1); };
+    root.addAndMakeVisible (presetPrevButton);
+    root.addAndMakeVisible (presetNextButton);
+
+    // ── Save preset flow (in-editor, no detached dialog) ─────────────────
+    savePresetButton.onClick = [this] { beginSavePresetFlow(); };
+    root.addAndMakeVisible (savePresetButton);
+
+    presetNameEditor.setColour (juce::TextEditor::backgroundColourId, CandleColours::btnOff);
+    presetNameEditor.setColour (juce::TextEditor::outlineColourId,    CandleColours::panelBorder);
+    presetNameEditor.setColour (juce::TextEditor::focusedOutlineColourId, CandleColours::amber);
+    presetNameEditor.setColour (juce::TextEditor::textColourId,       CandleColours::cream);
+    presetNameEditor.setFont (lookAndFeel.getGeorgiaFont (11.0f));
+    presetNameEditor.onReturnKey = [this] { confirmSavePreset(); };
+    presetNameEditor.onEscapeKey = [this] { cancelSavePreset(); };
+    presetSaveConfirmButton.onClick = [this] { confirmSavePreset(); };
+    presetSaveCancelButton.onClick  = [this] { cancelSavePreset(); };
+    root.addAndMakeVisible (presetNameEditor);
+    root.addAndMakeVisible (presetSaveConfirmButton);
+    root.addAndMakeVisible (presetSaveCancelButton);
+    presetNameEditor.setVisible (false);
+    presetSaveConfirmButton.setVisible (false);
+    presetSaveCancelButton.setVisible (false);
+
+    // ── Tooltip toggle (persisted globally, not per-project) ─────────────
+    tooltipSettings = makeTooltipSettings();
+    const bool tooltipsOn = tooltipSettings->getBoolValue ("tooltipsEnabled", true);
+    tooltipToggle.setClickingTogglesState (true);
+    tooltipToggle.setToggleState (tooltipsOn, juce::dontSendNotification);
+    if (tooltipsOn)
+        tooltipWindow = std::make_unique<juce::TooltipWindow> (this, 500);
+    tooltipToggle.onClick = [this]
+    {
+        const bool on = tooltipToggle.getToggleState();
+        tooltipWindow = on ? std::make_unique<juce::TooltipWindow> (this, 500) : nullptr;
+        tooltipSettings->setValue ("tooltipsEnabled", on);
+        tooltipSettings->saveIfNeeded();
+    };
+    root.addAndMakeVisible (tooltipToggle);
 
     // ── Tooltips ─────────────────────────────────────────────────────────
     knobTrim->setTooltip   ("Input trim — set recording level before the tape chain (±20 dB)");
     knobEqHigh->setTooltip ("Mixer high shelf — boosts or cuts above 10 kHz before tape (±10 dB)");
     knobEqLow->setTooltip  ("Mixer low shelf — boosts or cuts below 100 Hz before tape (±10 dB)");
     micButton.setTooltip   ("RadioShack Realistic mic emulation — shapes tone like the cheap "
-                            "dynamic mic Elliott Smith used for vocals on Roman Candle");
+                            "dynamic mic Elliott Smith used for vocals on Candle");
     dbxButton.setTooltip   ("DBX Type II noise reduction — on = quieter hiss, off = raw open-reel "
                             "noise floor (Smith often bypassed or had a faulty DBX)");
-    speedCombo.setTooltip  ("Tape speed — HIGH (3¾ ips) is cleanest, NORM (1⅞ ips) is the Roman "
+    speedCombo.setTooltip  ("Tape speed — HIGH (3¾ ips) is cleanest, NORM (1⅞ ips) is the "
                             "Candle speed, SLOW (15/16 ips) is maximum degradation");
     genCombo.setTooltip    ("Bounce generations — each ping-pong overdub adds noise and rolls off "
                             "high frequencies, as on multi-tracked cassette recordings");
     knobSat->setTooltip    ("Tape saturation — how hard the ferric oxide is driven; adds "
                             "2nd-harmonic warmth and soft limiting");
     knobNoise->setTooltip  ("Tape hiss + AC hum level — at zero the noise floor is fully suppressed; "
-                            "Roman Candle preset sits around 55%");
+                            "Candle preset sits around 55%");
     knobWow->setTooltip    ("Wow & flutter — slow pitch drift (wow) and fast capstan wobble (flutter) "
                             "from the 424's transport mechanism");
     knobAge->setTooltip    ("Head wear — increases HF loss, dropout frequency, and print-through "
                             "post-echo; simulates a heavily used transport");
     knobOutput->setTooltip ("Output level after the full tape chain (±12 dB)");
     bypassButton.setTooltip ("Bypass the entire tape chain — dry signal passes through unchanged");
-    presetCombo.setTooltip  ("Factory presets — Roman Candle, Portastudio, Bounce x3, Late Night, "
+    presetCombo.setTooltip  ("Factory presets — Candle, Porta, Bounce x3, Late Night, "
                              "New Tape");
+    presetPrevButton.setTooltip ("Previous preset");
+    presetNextButton.setTooltip ("Next preset");
+    savePresetButton.setTooltip ("Save the current settings as a new preset");
+    tooltipToggle.setTooltip    ("Show or hide mouse-over tooltips like this one");
 
     // ── Resizer ──────────────────────────────────────────────────────────
     constrainer.setSizeLimits (546, 252, 1170, 540);
@@ -114,6 +171,115 @@ CandleAudioProcessorEditor::~CandleAudioProcessorEditor()
 {
     setLookAndFeel (nullptr);
     stopTimer();
+}
+
+// ── Preset list (factory + user, unified for combo + arrows) ──────────────────
+void CandleAudioProcessorEditor::rebuildPresetList()
+{
+    const auto previousName = (currentPresetIndex >= 0 && currentPresetIndex < (int) presetEntries.size())
+                                   ? presetEntries[(size_t) currentPresetIndex].name : juce::String();
+
+    presetCombo.clear (juce::dontSendNotification);
+    presetEntries.clear();
+
+    presetCombo.addItem ("-- select preset --", 1);
+
+    int nextId = 2;
+    presetCombo.addSectionHeading ("FACTORY");
+    const auto factoryNames = processor.getPresetNames();
+    for (int i = 0; i < factoryNames.size(); ++i)
+    {
+        presetCombo.addItem (factoryNames[i], nextId);
+        presetEntries.push_back ({ factoryNames[i], true, i, nextId });
+        ++nextId;
+    }
+
+    const auto userNames = processor.getUserPresetNames();
+    if (! userNames.isEmpty())
+    {
+        presetCombo.addSectionHeading ("USER");
+        for (int i = 0; i < userNames.size(); ++i)
+        {
+            presetCombo.addItem (userNames[i], nextId);
+            presetEntries.push_back ({ userNames[i], false, i, nextId });
+            ++nextId;
+        }
+    }
+
+    currentPresetIndex = -1;
+    if (previousName.isNotEmpty())
+        for (int i = 0; i < (int) presetEntries.size(); ++i)
+            if (presetEntries[(size_t) i].name == previousName)
+                { currentPresetIndex = i; break; }
+
+    presetCombo.setSelectedId (currentPresetIndex >= 0 ? presetEntries[(size_t) currentPresetIndex].comboId : 1,
+                               juce::dontSendNotification);
+}
+
+void CandleAudioProcessorEditor::selectPresetEntry (int index, bool applyToProcessor)
+{
+    if (index < 0 || index >= (int) presetEntries.size())
+        return;
+
+    const auto& entry = presetEntries[(size_t) index];
+    currentPresetIndex = index;
+    presetCombo.setSelectedId (entry.comboId, juce::dontSendNotification);
+
+    if (applyToProcessor)
+    {
+        if (entry.isFactory)
+            processor.applyFactoryPreset (entry.factoryIndex);
+        else
+            processor.loadUserPresetByName (entry.name);
+    }
+}
+
+void CandleAudioProcessorEditor::stepPreset (int delta)
+{
+    if (presetEntries.empty())
+        return;
+
+    const int total = (int) presetEntries.size();
+    const int newIndex = (currentPresetIndex < 0) ? 0
+                                                   : ((currentPresetIndex + delta) % total + total) % total;
+    selectPresetEntry (newIndex, true);
+}
+
+// ── Save-preset flow (plain in-editor child components, no detached dialog) ──
+void CandleAudioProcessorEditor::beginSavePresetFlow()
+{
+    savePresetButton.setVisible (false);
+    presetNameEditor.setText ({}, juce::dontSendNotification);
+    presetNameEditor.setVisible (true);
+    presetSaveConfirmButton.setVisible (true);
+    presetSaveCancelButton.setVisible (true);
+    presetNameEditor.grabKeyboardFocus();
+}
+
+void CandleAudioProcessorEditor::confirmSavePreset()
+{
+    const auto name = presetNameEditor.getText().trim();
+    if (name.isNotEmpty() && processor.saveUserPreset (name))
+    {
+        rebuildPresetList();
+        for (int i = 0; i < (int) presetEntries.size(); ++i)
+        {
+            if (! presetEntries[(size_t) i].isFactory && presetEntries[(size_t) i].name == name)
+            {
+                selectPresetEntry (i, false); // state on disk already matches current parameters
+                break;
+            }
+        }
+        cancelSavePreset();
+    }
+}
+
+void CandleAudioProcessorEditor::cancelSavePreset()
+{
+    presetNameEditor.setVisible (false);
+    presetSaveConfirmButton.setVisible (false);
+    presetSaveCancelButton.setVisible (false);
+    savePresetButton.setVisible (true);
 }
 
 // ── Timer ─────────────────────────────────────────────────────────────────────
@@ -190,11 +356,29 @@ void CandleAudioProcessorEditor::resized()
     knobWow->setBounds   (kTapeX + tapeKnobSp * 3 + kTapeKnob * 2,         tapeKnobY, kTapeKnob, kTapeKnob + 14);
     knobAge->setBounds   (kTapeX + tapeKnobSp * 4 + kTapeKnob * 3,         tapeKnobY, kTapeKnob, kTapeKnob + 14);
 
-    // ── OUTPUT: big knob + preset at bottom ───────────────────────────────
+    // ── OUTPUT: big knob + preset row + save row + tooltip toggle ────────
     constexpr int kOutKnob = 80;
     const int outKnobX = kOutX + (kOutW - kOutKnob) / 2;
     knobOutput->setBounds (outKnobX, kBodyY + 20, kOutKnob, kOutKnob + 14);
-    presetCombo.setBounds (kOutX + 8, kBodyY + 160, kOutW - 16, 22);
+
+    constexpr int kArrowW = 20;
+    constexpr int kRowGap = 4;
+    const int presetRowY = kBodyY + 160;
+    const int presetRowX = kOutX + 8;
+    const int presetRowW = kOutW - 16;
+    presetPrevButton.setBounds (presetRowX, presetRowY, kArrowW, 22);
+    presetCombo.setBounds      (presetRowX + kArrowW + kRowGap, presetRowY,
+                                 presetRowW - 2 * (kArrowW + kRowGap), 22);
+    presetNextButton.setBounds (presetRowX + presetRowW - kArrowW, presetRowY, kArrowW, 22);
+
+    const int saveRowY = presetRowY + 22 + 10;
+    savePresetButton.setBounds (presetRowX, saveRowY, presetRowW, 20);
+    presetNameEditor.setBounds        (presetRowX, saveRowY, presetRowW - 40, 20);
+    presetSaveConfirmButton.setBounds (presetRowX + presetRowW - 40, saveRowY, 18, 20);
+    presetSaveCancelButton.setBounds  (presetRowX + presetRowW - 20, saveRowY, 18, 20);
+
+    const int tipsRowY = saveRowY + 20 + 14;
+    tooltipToggle.setBounds (presetRowX, tipsRowY, presetRowW, 22);
 
     resizer->setBounds (getWidth() - 14, getHeight() - 14, 14, 14);
 }
@@ -262,11 +446,11 @@ void CandleAudioProcessorEditor::drawHeader (juce::Graphics& g, juce::Rectangle<
 
     g.setFont (lookAndFeel.getGeorgiaFont (9.0f, juce::Font::italic));
     g.setColour (CandleColours::creamDim);
-    g.drawText ("PORTASTUDIO  424", 23, 35, 150, 14, juce::Justification::centredLeft);
+    g.drawText ("PORTA  424", 23, 35, 150, 14, juce::Justification::centredLeft);
 
     g.setFont (lookAndFeel.getMonoFont (7.0f));
     g.setColour (CandleColours::creamDim.withAlpha (0.78f));
-    g.drawText ("v" JucePlugin_VersionString "  qa-20260707",
+    g.drawText ("v" JucePlugin_VersionString "  qa-20260707e",
                 616, 35, 58, 12, juce::Justification::centredRight);
 
     // ── Cassette window (center of header) ────────────────────────────────

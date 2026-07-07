@@ -2,7 +2,7 @@
 #include <JuceHeader.h>
 
 // Emulates the cheap RadioShack "Realistic" dynamic mic that Elliott Smith
-// used for vocals on Roman Candle (non-detachable cord, on/off switch, ¼" plug).
+// used for vocals on Candle (non-detachable cord, on/off switch, ¼" plug).
 //
 // Modelled characteristics (based on comparable late-80s/early-90s Realistic
 // budget dynamics):

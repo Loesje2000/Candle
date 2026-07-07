@@ -47,12 +47,35 @@ private:
     std::unique_ptr<CandleKnob> knobOutput;
     juce::ToggleButton           bypassButton { "BYPASS" };
     juce::ComboBox               presetCombo;
+    juce::TextButton              presetPrevButton { "<" }, presetNextButton { ">" };
+
+    juce::TextButton  savePresetButton { "SAVE PRESET" };
+    juce::TextEditor  presetNameEditor;
+    juce::TextButton  presetSaveConfirmButton { "OK" }, presetSaveCancelButton { "X" };
+
+    juce::ToggleButton tooltipToggle { "TOOLTIPS" };
 
     // ── APVTS Attachments ─────────────────────────────────────────────────
     using BtnAtt = juce::AudioProcessorValueTreeState::ButtonAttachment;
     using CmbAtt = juce::AudioProcessorValueTreeState::ComboBoxAttachment;
     std::unique_ptr<BtnAtt> micAtt, dbxAtt, bypassAtt;
     std::unique_ptr<CmbAtt> speedAtt, genAtt;
+
+    // ── Preset list (factory + user presets, unified for combo + arrows) ──
+    struct PresetEntry { juce::String name; bool isFactory; int factoryIndex; int comboId; };
+    std::vector<PresetEntry> presetEntries;
+    int currentPresetIndex = -1;
+
+    void rebuildPresetList();
+    void selectPresetEntry (int index, bool applyToProcessor);
+    void stepPreset (int delta);
+    void beginSavePresetFlow();
+    void confirmSavePreset();
+    void cancelSavePreset();
+
+    // ── Tooltip toggle (persisted via a small properties file) ───────────
+    std::unique_ptr<juce::TooltipWindow>  tooltipWindow;
+    std::unique_ptr<juce::PropertiesFile> tooltipSettings;
 
     // ── Panel bounds (reference 600×260) ─────────────────────────────────
     juce::Rectangle<int> mixerPanel, tapePanel, outputPanel;

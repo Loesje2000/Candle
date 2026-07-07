@@ -41,6 +41,11 @@ public:
     void applyFactoryPreset (int index);
     juce::StringArray getPresetNames() const;
 
+    juce::File getUserPresetDirectory() const;
+    juce::StringArray getUserPresetNames() const;
+    bool saveUserPreset (const juce::String& name);
+    bool loadUserPresetByName (const juce::String& name);
+
     float getVULevel()     const noexcept { return tape.getVULevel(); }
     float getInputMeterDb()  const noexcept { return inputMeterDb.load(); }
     float getOutputMeterDb() const noexcept { return outputMeterDb.load(); }
@@ -52,6 +57,7 @@ private:
     MicStage     mic;
     CassetteTape tape;
     juce::SmoothedValue<float> outputGainSmooth;
+    juce::AudioBuffer<float> drySafetyBuffer;
     bool wasBypassed = false;
 
     std::atomic<float> inputMeterDb  { -100.0f };

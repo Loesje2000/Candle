@@ -4,7 +4,7 @@
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" version="0.1.0"
               companyName="Rubblesonic" companyCopyright="Rubblesonic 2026"
               companyWebsite="https://rubblesonic.com" bundleIdentifier="com.rubblesonic.candle"
-              pluginName="Candle" pluginDesc="Portastudio 424 cassette processor"
+              pluginName="Candle" pluginDesc="Porta 424 cassette processor"
               pluginManufacturer="Rubblesonic" pluginManufacturerCode="RUBS"
               pluginCode="CNDL" pluginFormats="buildAU,buildVST3"
               pluginAUExportPrefix="CandleAU" pluginAUMainType="'aufx'" pluginVSTCategory="kPlugCategEffect"
