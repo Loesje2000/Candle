@@ -112,6 +112,20 @@ CandleAudioProcessorEditor::CandleAudioProcessorEditor (CandleAudioProcessor& p)
     presetSaveConfirmButton.setVisible (false);
     presetSaveCancelButton.setVisible (false);
 
+    presetDeleteButton.onClick = [this]
+    {
+        if (currentPresetIndex < 0 || currentPresetIndex >= (int) presetEntries.size())
+            return;
+        if (presetEntries[(size_t) currentPresetIndex].isFactory)
+            return;
+        if (processor.deleteUserPreset (presetEntries[(size_t) currentPresetIndex].name))
+            rebuildPresetList();
+    };
+    presetRenameButton.onClick = [this] { beginRenamePresetFlow(); };
+    root.addAndMakeVisible (presetDeleteButton);
+    root.addAndMakeVisible (presetRenameButton);
+    updatePresetManageButtonsEnabled();
+
     // ── Tooltip toggle (persisted globally, not per-project) ─────────────
     tooltipSettings = makeTooltipSettings();
     const bool tooltipsOn = tooltipSettings->getBoolValue ("tooltipsEnabled", true);
@@ -155,6 +169,8 @@ CandleAudioProcessorEditor::CandleAudioProcessorEditor (CandleAudioProcessor& p)
     presetPrevButton.setTooltip ("Previous preset");
     presetNextButton.setTooltip ("Next preset");
     savePresetButton.setTooltip ("Save the current settings as a new preset");
+    presetDeleteButton.setTooltip ("Delete the selected user preset");
+    presetRenameButton.setTooltip ("Rename the selected user preset");
     tooltipToggle.setTooltip    ("Show or hide mouse-over tooltips like this one");
 
     // ── Resizer ──────────────────────────────────────────────────────────
@@ -214,6 +230,7 @@ void CandleAudioProcessorEditor::rebuildPresetList()
 
     presetCombo.setSelectedId (currentPresetIndex >= 0 ? presetEntries[(size_t) currentPresetIndex].comboId : 1,
                                juce::dontSendNotification);
+    updatePresetManageButtonsEnabled();
 }
 
 void CandleAudioProcessorEditor::selectPresetEntry (int index, bool applyToProcessor)
@@ -232,6 +249,16 @@ void CandleAudioProcessorEditor::selectPresetEntry (int index, bool applyToProce
         else
             processor.loadUserPresetByName (entry.name);
     }
+    updatePresetManageButtonsEnabled();
+}
+
+void CandleAudioProcessorEditor::updatePresetManageButtonsEnabled()
+{
+    const bool isUserPreset = currentPresetIndex >= 0
+                            && currentPresetIndex < (int) presetEntries.size()
+                            && ! presetEntries[(size_t) currentPresetIndex].isFactory;
+    presetDeleteButton.setEnabled (isUserPreset);
+    presetRenameButton.setEnabled (isUserPreset);
 }
 
 void CandleAudioProcessorEditor::stepPreset (int delta)
@@ -245,10 +272,13 @@ void CandleAudioProcessorEditor::stepPreset (int delta)
     selectPresetEntry (newIndex, true);
 }
 
-// ── Save-preset flow (plain in-editor child components, no detached dialog) ──
+// ── Save/rename-preset flow (plain in-editor child components, no detached dialog) ──
 void CandleAudioProcessorEditor::beginSavePresetFlow()
 {
+    isRenamingPreset = false;
     savePresetButton.setVisible (false);
+    presetDeleteButton.setEnabled (false);
+    presetRenameButton.setEnabled (false);
     presetNameEditor.setText ({}, juce::dontSendNotification);
     presetNameEditor.setVisible (true);
     presetSaveConfirmButton.setVisible (true);
@@ -256,10 +286,44 @@ void CandleAudioProcessorEditor::beginSavePresetFlow()
     presetNameEditor.grabKeyboardFocus();
 }
 
+void CandleAudioProcessorEditor::beginRenamePresetFlow()
+{
+    if (currentPresetIndex < 0 || currentPresetIndex >= (int) presetEntries.size())
+        return;
+    if (presetEntries[(size_t) currentPresetIndex].isFactory)
+        return;
+
+    isRenamingPreset = true;
+    savePresetButton.setVisible (false);
+    presetDeleteButton.setEnabled (false);
+    presetRenameButton.setEnabled (false);
+    presetNameEditor.setText (presetEntries[(size_t) currentPresetIndex].name, juce::dontSendNotification);
+    presetNameEditor.setVisible (true);
+    presetSaveConfirmButton.setVisible (true);
+    presetSaveCancelButton.setVisible (true);
+    presetNameEditor.grabKeyboardFocus();
+    presetNameEditor.selectAll();
+}
+
 void CandleAudioProcessorEditor::confirmSavePreset()
 {
     const auto name = presetNameEditor.getText().trim();
-    if (name.isNotEmpty() && processor.saveUserPreset (name))
+    if (name.isEmpty())
+        return;
+
+    bool ok = false;
+    if (isRenamingPreset)
+    {
+        const auto oldName = (currentPresetIndex >= 0 && currentPresetIndex < (int) presetEntries.size())
+                                  ? presetEntries[(size_t) currentPresetIndex].name : juce::String();
+        ok = oldName.isNotEmpty() && processor.renameUserPreset (oldName, name);
+    }
+    else
+    {
+        ok = processor.saveUserPreset (name);
+    }
+
+    if (ok)
     {
         rebuildPresetList();
         for (int i = 0; i < (int) presetEntries.size(); ++i)
@@ -276,10 +340,12 @@ void CandleAudioProcessorEditor::confirmSavePreset()
 
 void CandleAudioProcessorEditor::cancelSavePreset()
 {
+    isRenamingPreset = false;
     presetNameEditor.setVisible (false);
     presetSaveConfirmButton.setVisible (false);
     presetSaveCancelButton.setVisible (false);
     savePresetButton.setVisible (true);
+    updatePresetManageButtonsEnabled();
 }
 
 // ── Timer ─────────────────────────────────────────────────────────────────────
@@ -379,6 +445,12 @@ void CandleAudioProcessorEditor::resized()
 
     const int tipsRowY = saveRowY + 20 + 14;
     tooltipToggle.setBounds (presetRowX, tipsRowY, presetRowW, 22);
+
+    const int manageRowY = tipsRowY + 22 + 8;
+    const int manageBtnW = (presetRowW - kRowGap) / 2;
+    presetRenameButton.setBounds (presetRowX, manageRowY, manageBtnW, 20);
+    presetDeleteButton.setBounds (presetRowX + manageBtnW + kRowGap, manageRowY,
+                                   presetRowW - manageBtnW - kRowGap, 20);
 
     resizer->setBounds (getWidth() - 14, getHeight() - 14, 14, 14);
 }

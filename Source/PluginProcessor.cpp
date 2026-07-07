@@ -106,7 +106,18 @@ void CandleAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock
 {
     juce::dsp::ProcessSpec spec { sampleRate, static_cast<juce::uint32> (samplesPerBlock), 2 };
     mic.prepare (spec);
-    tape.prepare (spec);
+
+    oversampling.initProcessing (static_cast<size_t> (samplesPerBlock));
+    oversampling.reset();
+
+    const auto factor = oversampling.getOversamplingFactor();
+    juce::dsp::ProcessSpec oversampledSpec { sampleRate * static_cast<double> (factor),
+                                              static_cast<juce::uint32> (samplesPerBlock * static_cast<int> (factor)),
+                                              2 };
+    tape.prepare (oversampledSpec);
+
+    setLatencySamples (juce::roundToInt (oversampling.getLatencyInSamples()));
+
     outputGainSmooth.reset (sampleRate, 0.02);
     outputGainSmooth.setCurrentAndTargetValue (1.0f);
     drySafetyBuffer.setSize (2, samplesPerBlock, false, false, true);
@@ -117,6 +128,7 @@ void CandleAudioProcessor::releaseResources()
 {
     mic.reset();
     tape.reset();
+    oversampling.reset();
     wasBypassed = false;
 }
 
@@ -174,6 +186,7 @@ void CandleAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     {
         mic.reset();
         tape.reset();
+        oversampling.reset();
         outputGainSmooth.setCurrentAndTargetValue (juce::Decibels::decibelsToGain (get (ParamID::outputGain)));
         wasBypassed = false;
     }
@@ -192,9 +205,27 @@ void CandleAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
     p.age         = get (ParamID::age);
     p.generations = static_cast<int> (get (ParamID::generations) + 0.5f);
 
-    tape.process (buffer, p);
+    {
+        juce::dsp::AudioBlock<float> nativeBlock (buffer);
+        auto ovBlock = oversampling.processSamplesUp (nativeBlock);
+
+        float* ovChannels[2] = { ovBlock.getChannelPointer (0), ovBlock.getChannelPointer (1) };
+        juce::AudioBuffer<float> ovBuffer (ovChannels, 2, static_cast<int> (ovBlock.getNumSamples()));
+
+        tape.process (ovBuffer, p);
+        if (sanitizeAudio (ovBuffer))
+        {
+            tape.reset();
+            oversampling.reset();
+        }
+
+        oversampling.processSamplesDown (nativeBlock);
+    }
     if (sanitizeAudio (buffer))
+    {
         tape.reset();
+        oversampling.reset();
+    }
 
     // Output gain
     outputGainSmooth.setTargetValue (juce::Decibels::decibelsToGain (get (ParamID::outputGain)));
@@ -378,6 +409,54 @@ bool CandleAudioProcessor::loadUserPresetByName (const juce::String& name)
         }
     }
     return false;
+}
+
+bool CandleAudioProcessor::deleteUserPreset (const juce::String& name)
+{
+    for (const auto& file : getUserPresetDirectory().findChildFiles (juce::File::findFiles, false, "*.xml"))
+    {
+        if (auto xml = juce::XmlDocument::parse (file))
+        {
+            const auto presetName = xml->getStringAttribute ("presetName", file.getFileNameWithoutExtension());
+            if (presetName == name)
+                return file.deleteFile();
+        }
+    }
+    return false;
+}
+
+bool CandleAudioProcessor::renameUserPreset (const juce::String& oldName, const juce::String& newName)
+{
+    const auto trimmedNew = newName.trim();
+    if (trimmedNew.isEmpty())
+        return false;
+
+    juce::File oldFile;
+    for (const auto& file : getUserPresetDirectory().findChildFiles (juce::File::findFiles, false, "*.xml"))
+    {
+        if (auto xml = juce::XmlDocument::parse (file))
+        {
+            const auto presetName = xml->getStringAttribute ("presetName", file.getFileNameWithoutExtension());
+            if (presetName == oldName) { oldFile = file; break; }
+        }
+    }
+    if (! oldFile.existsAsFile())
+        return false;
+
+    auto xml = juce::XmlDocument::parse (oldFile);
+    if (xml == nullptr)
+        return false;
+
+    xml->setAttribute ("presetName", trimmedNew);
+    const auto newFile = getUserPresetDirectory().getChildFile (juce::File::createLegalFileName (trimmedNew) + ".xml");
+
+    if (! xml->writeTo (newFile))
+        return false;
+
+    if (newFile != oldFile)
+        oldFile.deleteFile();
+
+    return true;
 }
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() { return new CandleAudioProcessor(); }

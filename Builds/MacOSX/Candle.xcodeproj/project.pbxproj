@@ -15,6 +15,7 @@
 			dependencies = (
 				6741FDEF66795C5D72E7364B,
 				8B30E7C5293ABB212AA5E7C6,
+				9C726294A36C9790346347C0,
 				5F0A16359E5C397B9AA1E13B,
 				B588D2D3AAC227F5D7F9ED00,
 			);
@@ -33,6 +34,7 @@
 		28D5911DD3523426C5A6F4E9 /* include_juce_events.mm */ = {isa = PBXBuildFile; fileRef = 603B05B23385F611CBAB4EF4; };
 		2C489FBDAF7A433D0674852B /* RecentFilesMenuTemplate.nib */ = {isa = PBXBuildFile; fileRef = C7F329858E05FCA2D519A2D0; };
 		2C4EDCACA5EEB01537452BF7 /* include_juce_audio_processors_headless.mm */ = {isa = PBXBuildFile; fileRef = 76863CAF01DB5A56055D4E45; };
+		2D9BF52F31003477DA5FEE78 /* include_juce_audio_plugin_client_Standalone.cpp */ = {isa = PBXBuildFile; fileRef = 42D8842EE87B0DB50C4A7967; };
 		322DD63BFEFC12D30C5415AA /* include_juce_graphics_Harfbuzz.cpp */ = {isa = PBXBuildFile; fileRef = 58614C180B81944BECDB9B7B; };
 		33C26798C106A5929AB019F6 /* include_juce_gui_basics.mm */ = {isa = PBXBuildFile; fileRef = 83FB9FED7C0BE97DE9B2A360; };
 		36AEB64254384A6247590D39 /* include_juce_audio_basics.mm */ = {isa = PBXBuildFile; fileRef = 8841DF256A0D4B70271D1435; };
@@ -45,6 +47,7 @@
 		504E19C152B642BBC59BA79D /* QuartzCore.framework */ = {isa = PBXBuildFile; fileRef = 2A6EEBC3D832EE4684BBB708; };
 		5EF9976F9FEE3DC2BB708B42 /* VST3 */ = {isa = PBXBuildFile; fileRef = 1E32BF2DC953C910C8190005; };
 		5FEE2A876A71D9E02C0DDCFF /* Foundation.framework */ = {isa = PBXBuildFile; fileRef = 58C38592C5B9A969929CD617; };
+		617D91F5F60F10E76C2B9287 /* Standalone Plugin */ = {isa = PBXBuildFile; fileRef = E6CC2B8FEB8C113D45C8AA9D; };
 		672BEC08CD66B8FEBC37C29F /* PluginProcessor.cpp */ = {isa = PBXBuildFile; fileRef = 640426B722EAACF53FBF14CA; };
 		6D2C974198AC0221DDBC98D9 /* CandleKnob.cpp */ = {isa = PBXBuildFile; fileRef = B4B3387F974C5AB3D520B171; };
 		6EF0E0E4C7BA3F92CD1787CF /* include_juce_audio_utils.mm */ = {isa = PBXBuildFile; fileRef = D8AB2588E173E305C2D97FCF; };
@@ -99,6 +102,7 @@
 		375D3180BE527E44DB8445C0 /* include_juce_audio_devices.mm */ /* include_juce_audio_devices.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_audio_devices.mm; path = ../../JuceLibraryCode/include_juce_audio_devices.mm; sourceTree = SOURCE_ROOT; };
 		3A0D895955B0659848870968 /* CandleLookAndFeel.cpp */ /* CandleLookAndFeel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = CandleLookAndFeel.cpp; path = ../../Source/gui/CandleLookAndFeel.cpp; sourceTree = SOURCE_ROOT; };
 		3C100B95A194444AD5C164EA /* Info-VST3.plist */ /* Info-VST3.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Info-VST3.plist"; path = "Info-VST3.plist"; sourceTree = SOURCE_ROOT; };
+		42D8842EE87B0DB50C4A7967 /* include_juce_audio_plugin_client_Standalone.cpp */ /* include_juce_audio_plugin_client_Standalone.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = include_juce_audio_plugin_client_Standalone.cpp; path = ../../JuceLibraryCode/include_juce_audio_plugin_client_Standalone.cpp; sourceTree = SOURCE_ROOT; };
 		467D371A8B197CF1D0D8F9F5 /* juce_audio_devices */ /* juce_audio_devices */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_audio_devices; path = /Applications/JUCE/modules/juce_audio_devices; sourceTree = "<absolute>"; };
 		4D42D36612797898D903D10F /* include_juce_audio_processors.mm */ /* include_juce_audio_processors.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_audio_processors.mm; path = ../../JuceLibraryCode/include_juce_audio_processors.mm; sourceTree = SOURCE_ROOT; };
 		4E0D7265295E0DC4C48DF15E /* Security.framework */ /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
@@ -148,8 +152,10 @@
 		D8B3A852D2180D9C923896A5 /* juce_audio_processors_headless */ /* juce_audio_processors_headless */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_audio_processors_headless; path = /Applications/JUCE/modules/juce_audio_processors_headless; sourceTree = "<absolute>"; };
 		E14FBDE8441F5C168BB5431F /* juce_gui_basics */ /* juce_gui_basics */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_gui_basics; path = /Applications/JUCE/modules/juce_gui_basics; sourceTree = "<absolute>"; };
 		E336B1EC68322D38C3052005 /* Accelerate.framework */ /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
+		E3B3D67EC8A105112314FC3F /* Info-Standalone_Plugin.plist */ /* Info-Standalone_Plugin.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Info-Standalone_Plugin.plist"; path = "Info-Standalone_Plugin.plist"; sourceTree = SOURCE_ROOT; };
 		E451540F275C992BDB877C8A /* CoreMIDI.framework */ /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = System/Library/Frameworks/CoreMIDI.framework; sourceTree = SDKROOT; };
 		E565E90F2C6D1B3292EC2F85 /* Metal.framework */ /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
+		E6CC2B8FEB8C113D45C8AA9D /* Standalone Plugin */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Candle.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EC2C80304A5DFF83850F0952 /* CandleLookAndFeel.h */ /* CandleLookAndFeel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CandleLookAndFeel.h; path = ../../Source/gui/CandleLookAndFeel.h; sourceTree = SOURCE_ROOT; };
 		EFB66291B49D9379ECAA0CF0 /* juce_audio_formats */ /* juce_audio_formats */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_audio_formats; path = /Applications/JUCE/modules/juce_audio_formats; sourceTree = "<absolute>"; };
 		EFFA0EE38D7B80C23FCDCE47 /* juce_events */ /* juce_events */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_events; path = /Applications/JUCE/modules/juce_events; sourceTree = "<absolute>"; };
@@ -225,6 +231,27 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D6B09BAFB404C6D25B856654 = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B8372AB90078361EDBD06DA7,
+				8D5753C3A241428F261CBEE9,
+				CBD29BF6DEEDCEE5CD4D439A,
+				395626508C2A273338778984,
+				71D79A432249662F8EFBBF26,
+				D183A1046A7AC0B58199614C,
+				88F353F66A3C2246587A920E,
+				5FEE2A876A71D9E02C0DDCFF,
+				1AF41F68C36F81529B792966,
+				504E19C152B642BBC59BA79D,
+				AC5974305D197AC14A1CEE72,
+				3CEBBB92B4C9902D6732AE23,
+				EE872CB5619D56FECBFE0D6D,
+				D05D36B4DC310B05452F1ED5,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -241,6 +268,7 @@
 			children = (
 				3C100B95A194444AD5C164EA,
 				7042B3647A0DC6B2B1F625F3,
+				E3B3D67EC8A105112314FC3F,
 				F858B10086683202C58510AC,
 				C7F329858E05FCA2D519A2D0,
 			);
@@ -274,6 +302,7 @@
 			children = (
 				1E32BF2DC953C910C8190005,
 				1A3DE0C0486B884B10142814,
+				E6CC2B8FEB8C113D45C8AA9D,
 				0891BE65CC0869D43F2ABDB7,
 				73E3CF6976A2D04729BDAEF5,
 			);
@@ -332,6 +361,7 @@
 				155544AB42F082CA254859FF,
 				0F5AC78012FD9172B7584547,
 				D00F830933E708FC00BF64D9,
+				42D8842EE87B0DB50C4A7967,
 				73A1E6E0542C656674A2E0EC,
 				4D42D36612797898D903D10F,
 				76863CAF01DB5A56055D4E45,
@@ -438,6 +468,25 @@
 			productName = Candle;
 			productReference = 1A3DE0C0486B884B10142814;
 			productType = "com.apple.product-type.bundle";
+		};
+		CF02B6BA814DB98354CC3F94 /* Candle - Standalone Plugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 88721199A2744CA29282C1CE;
+			buildPhases = (
+				476C596C1B93CBEE357FEEAB,
+				043DF547A792A4B95C81902D,
+				D6B09BAFB404C6D25B856654,
+				9EEFFF914A06B6948C96F60B,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B2E50EE53ED147BA4A56063C,
+			);
+			name = "Candle - Standalone Plugin";
+			productName = Candle;
+			productReference = E6CC2B8FEB8C113D45C8AA9D;
+			productType = "com.apple.product-type.application";
 		};
 		DC332F610FBED35FDCC51963 /* Candle - VST3 */ = {
 			isa = PBXNativeTarget;
@@ -559,6 +608,28 @@
 							};
 						};
 					};
+					CF02B6BA814DB98354CC3F94 = {
+						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = {
+								enabled = 0;
+							};
+							com.apple.HardenedRuntime = {
+								enabled = 0;
+							};
+							com.apple.InAppPurchase = {
+								enabled = 0;
+							};
+							com.apple.InterAppAudio = {
+								enabled = 0;
+							};
+							com.apple.Push = {
+								enabled = 0;
+							};
+							com.apple.Sandbox = {
+								enabled = 0;
+							};
+						};
+					};
 					DC332F610FBED35FDCC51963 = {
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
@@ -597,6 +668,7 @@
 				564B0EAF4AC19FC3AFC0BF43,
 				DC332F610FBED35FDCC51963,
 				69057DF6B151F3AA9B39A1DF,
+				CF02B6BA814DB98354CC3F94,
 				50148ECDC1E883D119ACB722,
 				3F3105D8693FBCA29CC720D4,
 			);
@@ -604,6 +676,14 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		476C596C1B93CBEE357FEEAB = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2C489FBDAF7A433D0674852B,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		7D0ED4A3D9A7D5E9412A30F8 = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -656,6 +736,17 @@
 			shellPath = /bin/sh;
 			shellScript = "set -euo pipefail\n\necho Running \\\"${CONFIGURATION_BUILD_DIR}/juce_vst3_helper\\\" \\> \\\"${CONFIGURATION_BUILD_DIR}/${WRAPPER_NAME}/Contents/Resources/moduleinfo.json\\\"\n\"${CONFIGURATION_BUILD_DIR}/juce_vst3_helper\" > \"${CONFIGURATION_BUILD_DIR}/${WRAPPER_NAME}/Contents/Resources/moduleinfo.json\"\n";
 		};
+		9EEFFF914A06B6948C96F60B /* Sign Target */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			name = "Sign Target";
+			alwaysOutOfDate = 1;
+			shellPath = /bin/sh;
+			shellScript = "set -euo pipefail\n\necho Signing Identity:	${EXPANDED_CODE_SIGN_IDENTITY_NAME:-${CODE_SIGN_IDENTITY}}\n\nentitlementsFile=\"${TARGET_TEMP_DIR}/${FULL_PRODUCT_NAME}.xcent\"\n\nif [[ ! -f \"${entitlementsFile}\" ]]; then\n  entitlementsFile=\"\"\nfi\n\necho Entitlements File:	${entitlementsFile:-None}\necho\necho Running codesign --force --sign \\\"${EXPANDED_CODE_SIGN_IDENTITY:-${CODE_SIGN_IDENTITY}}\\\" --verbose=4 --timestamp  ${entitlementsFile:+--entitlements \\\"${entitlementsFile}\\\"} --generate-entitlement-der \\\"${CODESIGNING_FOLDER_PATH}\\\"\ncodesign --force --sign \"${EXPANDED_CODE_SIGN_IDENTITY:-${CODE_SIGN_IDENTITY}}\" --verbose=4 --timestamp  ${entitlementsFile:+--entitlements \"${entitlementsFile}\"} --generate-entitlement-der \"${CODESIGNING_FOLDER_PATH}\"\necho\necho Running codesign --verify --deep --verbose=4 \\\"${CODESIGNING_FOLDER_PATH}\\\"\ncodesign --verify --deep --verbose=4 \"${CODESIGNING_FOLDER_PATH}\"\n";
+		};
 		A364C8878E0D98BC9B822DE2 /* Sign Target */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -692,6 +783,14 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		043DF547A792A4B95C81902D = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2D9BF52F31003477DA5FEE78,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		121D5568834DD69F45D51515 = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -775,6 +874,14 @@
 		8B30E7C5293ABB212AA5E7C6 = {
 			isa = PBXTargetDependency;
 			target = 69057DF6B151F3AA9B39A1DF;
+		};
+		9C726294A36C9790346347C0 = {
+			isa = PBXTargetDependency;
+			target = CF02B6BA814DB98354CC3F94;
+		};
+		B2E50EE53ED147BA4A56063C = {
+			isa = PBXTargetDependency;
+			target = 50148ECDC1E883D119ACB722;
 		};
 		B588D2D3AAC227F5D7F9ED00 = {
 			isa = PBXTargetDependency;
@@ -1239,7 +1346,7 @@
 					"JucePlugin_Build_AU=1",
 					"JucePlugin_Build_AUv3=0",
 					"JucePlugin_Build_AAX=0",
-					"JucePlugin_Build_Standalone=0",
+					"JucePlugin_Build_Standalone=1",
 					"JucePlugin_Build_Unity=0",
 					"JucePlugin_Build_LV2=0",
 					"JucePlugin_Enable_IAA=0",
@@ -1322,6 +1429,120 @@
 			};
 			name = Release;
 		};
+		878CA70D17B5A5B9869544F9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_LINK_OBJC_RUNTIME = NO;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
+				COPY_PHASE_STRIP = NO;
+				DEPLOYMENT_POSTPROCESSING = NO;
+				EXCLUDED_ARCHS = "";
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"_DEBUG=1",
+					"DEBUG=1",
+					"JUCE_PROJUCER_VERSION=0x8000d",
+					"JUCE_MODULE_AVAILABLE_juce_audio_basics=1",
+					"JUCE_MODULE_AVAILABLE_juce_audio_devices=1",
+					"JUCE_MODULE_AVAILABLE_juce_audio_formats=1",
+					"JUCE_MODULE_AVAILABLE_juce_audio_plugin_client=1",
+					"JUCE_MODULE_AVAILABLE_juce_audio_processors=1",
+					"JUCE_MODULE_AVAILABLE_juce_audio_processors_headless=1",
+					"JUCE_MODULE_AVAILABLE_juce_audio_utils=1",
+					"JUCE_MODULE_AVAILABLE_juce_core=1",
+					"JUCE_MODULE_AVAILABLE_juce_data_structures=1",
+					"JUCE_MODULE_AVAILABLE_juce_dsp=1",
+					"JUCE_MODULE_AVAILABLE_juce_events=1",
+					"JUCE_MODULE_AVAILABLE_juce_graphics=1",
+					"JUCE_MODULE_AVAILABLE_juce_gui_basics=1",
+					"JUCE_MODULE_AVAILABLE_juce_gui_extra=1",
+					"JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1",
+					"JUCE_VST3_CAN_REPLACE_VST2=0",
+					"JUCE_STRICT_REFCOUNTEDPOINTER=1",
+					"JucePlugin_Build_VST=0",
+					"JucePlugin_Build_VST3=0",
+					"JucePlugin_Build_AU=0",
+					"JucePlugin_Build_AUv3=0",
+					"JucePlugin_Build_AAX=0",
+					"JucePlugin_Build_Standalone=1",
+					"JucePlugin_Build_Unity=0",
+					"JucePlugin_Build_LV2=0",
+					"JucePlugin_Enable_IAA=0",
+					"JucePlugin_Enable_ARA=0",
+					"JucePlugin_Name=\\\"Candle\\\"",
+					"JucePlugin_Desc=\\\"Porta\\ 424\\ cassette\\ processor\\\"",
+					"JucePlugin_Manufacturer=\\\"Rubblesonic\\\"",
+					"JucePlugin_ManufacturerWebsite=\\\"https://rubblesonic.com\\\"",
+					"JucePlugin_ManufacturerEmail=\\\"\\\"",
+					"JucePlugin_ManufacturerCode=0x52554253",
+					"JucePlugin_PluginCode=0x434e444c",
+					"JucePlugin_IsSynth=0",
+					"JucePlugin_WantsMidiInput=0",
+					"JucePlugin_ProducesMidiOutput=0",
+					"JucePlugin_IsMidiEffect=0",
+					"JucePlugin_EditorRequiresKeyboardFocus=0",
+					"JucePlugin_Version=0.1.0",
+					"JucePlugin_VersionCode=0x100",
+					"JucePlugin_VersionString=\\\"0.1.0\\\"",
+					"JucePlugin_VSTUniqueID=JucePlugin_PluginCode",
+					"JucePlugin_VSTCategory=kPlugCategEffect",
+					"JucePlugin_Vst3Category=\\\"Fx\\\"",
+					"JucePlugin_AUMainType=\\'aufx\\'",
+					"JucePlugin_AUSubType=JucePlugin_PluginCode",
+					"JucePlugin_AUExportPrefix=CandleAU",
+					"JucePlugin_AUExportPrefixQuoted=\\\"CandleAU\\\"",
+					"JucePlugin_AUManufacturerCode=JucePlugin_ManufacturerCode",
+					"JucePlugin_CFBundleIdentifier=com.rubblesonic.candle",
+					"JucePlugin_AAXIdentifier=com.Rubblesonic.Candle",
+					"JucePlugin_AAXManufacturerCode=JucePlugin_ManufacturerCode",
+					"JucePlugin_AAXProductId=JucePlugin_PluginCode",
+					"JucePlugin_AAXCategory=0",
+					"JucePlugin_AAXDisableBypass=0",
+					"JucePlugin_AAXDisableMultiMono=0",
+					"JucePlugin_IAAType=0x61757278",
+					"JucePlugin_IAASubType=JucePlugin_PluginCode",
+					"JucePlugin_IAAName=\\\"Rubblesonic:\\ Candle\\\"",
+					"JucePlugin_VSTNumMidiInputs=16",
+					"JucePlugin_VSTNumMidiOutputs=16",
+					"JucePlugin_ARAContentTypes=0",
+					"JucePlugin_ARATransformationFlags=0",
+					"JucePlugin_ARAFactoryID=\\\"com.Rubblesonic.Candle.factory\\\"",
+					"JucePlugin_ARADocumentArchiveID=\\\"com.Rubblesonic.Candle.aradocumentarchive.0.1.0\\\"",
+					"JucePlugin_ARACompatibleArchiveIDs=\\\"\\\"",
+					"JUCE_STANDALONE_APPLICATION=JucePlugin_Build_Standalone",
+					"JUCER_XCODE_MAC_F6D2F4CF=1",
+					"JUCE_APP_VERSION=0.1.0",
+					"JUCE_APP_VERSION_HEX=0x100",
+				);
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				HEADER_SEARCH_PATHS = (
+					"/Applications/JUCE/modules/juce_audio_processors_headless/format_types/VST3_SDK",
+					"$(SRCROOT)/../../JuceLibraryCode",
+					"/Applications/JUCE/modules",
+					"/Applications/JUCE/modules/juce_audio_plugin_client/AU",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = Info-Standalone_Plugin.plist;
+				INFOPLIST_PREPROCESS = NO;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_HEADER_SEARCH_PATHS = "/Applications/JUCE/modules/juce_audio_processors_headless/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode /Applications/JUCE/modules /Applications/JUCE/modules/juce_audio_plugin_client/AU";
+				OTHER_CFLAGS = "$(inherited)";
+				OTHER_CPLUSPLUSFLAGS = "$(inherited)";
+				OTHER_LDFLAGS = "$(inherited) -lCandle";
+				PRODUCT_BUNDLE_IDENTIFIER = com.rubblesonic.candle;
+				PRODUCT_NAME = "Candle";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				USE_HEADERMAP = NO;
+				VALID_ARCHS = "i386 x86_64 arm64 arm64e";
+			};
+			name = Debug;
+		};
 		B099123E90B0D6AC90F046AA /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1368,6 +1589,121 @@
 				SDKROOT = macosx;
 				WARNING_CFLAGS = "-Wreorder";
 				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		B7E0663A862040A3545BE480 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_LINK_OBJC_RUNTIME = NO;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/build/$(CONFIGURATION)";
+				DEAD_CODE_STRIPPING = YES;
+				DEPLOYMENT_POSTPROCESSING = NO;
+				EXCLUDED_ARCHS = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"_NDEBUG=1",
+					"NDEBUG=1",
+					"JUCE_PROJUCER_VERSION=0x8000d",
+					"JUCE_MODULE_AVAILABLE_juce_audio_basics=1",
+					"JUCE_MODULE_AVAILABLE_juce_audio_devices=1",
+					"JUCE_MODULE_AVAILABLE_juce_audio_formats=1",
+					"JUCE_MODULE_AVAILABLE_juce_audio_plugin_client=1",
+					"JUCE_MODULE_AVAILABLE_juce_audio_processors=1",
+					"JUCE_MODULE_AVAILABLE_juce_audio_processors_headless=1",
+					"JUCE_MODULE_AVAILABLE_juce_audio_utils=1",
+					"JUCE_MODULE_AVAILABLE_juce_core=1",
+					"JUCE_MODULE_AVAILABLE_juce_data_structures=1",
+					"JUCE_MODULE_AVAILABLE_juce_dsp=1",
+					"JUCE_MODULE_AVAILABLE_juce_events=1",
+					"JUCE_MODULE_AVAILABLE_juce_graphics=1",
+					"JUCE_MODULE_AVAILABLE_juce_gui_basics=1",
+					"JUCE_MODULE_AVAILABLE_juce_gui_extra=1",
+					"JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1",
+					"JUCE_VST3_CAN_REPLACE_VST2=0",
+					"JUCE_STRICT_REFCOUNTEDPOINTER=1",
+					"JucePlugin_Build_VST=0",
+					"JucePlugin_Build_VST3=0",
+					"JucePlugin_Build_AU=0",
+					"JucePlugin_Build_AUv3=0",
+					"JucePlugin_Build_AAX=0",
+					"JucePlugin_Build_Standalone=1",
+					"JucePlugin_Build_Unity=0",
+					"JucePlugin_Build_LV2=0",
+					"JucePlugin_Enable_IAA=0",
+					"JucePlugin_Enable_ARA=0",
+					"JucePlugin_Name=\\\"Candle\\\"",
+					"JucePlugin_Desc=\\\"Porta\\ 424\\ cassette\\ processor\\\"",
+					"JucePlugin_Manufacturer=\\\"Rubblesonic\\\"",
+					"JucePlugin_ManufacturerWebsite=\\\"https://rubblesonic.com\\\"",
+					"JucePlugin_ManufacturerEmail=\\\"\\\"",
+					"JucePlugin_ManufacturerCode=0x52554253",
+					"JucePlugin_PluginCode=0x434e444c",
+					"JucePlugin_IsSynth=0",
+					"JucePlugin_WantsMidiInput=0",
+					"JucePlugin_ProducesMidiOutput=0",
+					"JucePlugin_IsMidiEffect=0",
+					"JucePlugin_EditorRequiresKeyboardFocus=0",
+					"JucePlugin_Version=0.1.0",
+					"JucePlugin_VersionCode=0x100",
+					"JucePlugin_VersionString=\\\"0.1.0\\\"",
+					"JucePlugin_VSTUniqueID=JucePlugin_PluginCode",
+					"JucePlugin_VSTCategory=kPlugCategEffect",
+					"JucePlugin_Vst3Category=\\\"Fx\\\"",
+					"JucePlugin_AUMainType=\\'aufx\\'",
+					"JucePlugin_AUSubType=JucePlugin_PluginCode",
+					"JucePlugin_AUExportPrefix=CandleAU",
+					"JucePlugin_AUExportPrefixQuoted=\\\"CandleAU\\\"",
+					"JucePlugin_AUManufacturerCode=JucePlugin_ManufacturerCode",
+					"JucePlugin_CFBundleIdentifier=com.rubblesonic.candle",
+					"JucePlugin_AAXIdentifier=com.Rubblesonic.Candle",
+					"JucePlugin_AAXManufacturerCode=JucePlugin_ManufacturerCode",
+					"JucePlugin_AAXProductId=JucePlugin_PluginCode",
+					"JucePlugin_AAXCategory=0",
+					"JucePlugin_AAXDisableBypass=0",
+					"JucePlugin_AAXDisableMultiMono=0",
+					"JucePlugin_IAAType=0x61757278",
+					"JucePlugin_IAASubType=JucePlugin_PluginCode",
+					"JucePlugin_IAAName=\\\"Rubblesonic:\\ Candle\\\"",
+					"JucePlugin_VSTNumMidiInputs=16",
+					"JucePlugin_VSTNumMidiOutputs=16",
+					"JucePlugin_ARAContentTypes=0",
+					"JucePlugin_ARATransformationFlags=0",
+					"JucePlugin_ARAFactoryID=\\\"com.Rubblesonic.Candle.factory\\\"",
+					"JucePlugin_ARADocumentArchiveID=\\\"com.Rubblesonic.Candle.aradocumentarchive.0.1.0\\\"",
+					"JucePlugin_ARACompatibleArchiveIDs=\\\"\\\"",
+					"JUCE_STANDALONE_APPLICATION=JucePlugin_Build_Standalone",
+					"JUCER_XCODE_MAC_F6D2F4CF=1",
+					"JUCE_APP_VERSION=0.1.0",
+					"JUCE_APP_VERSION_HEX=0x100",
+				);
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				HEADER_SEARCH_PATHS = (
+					"/Applications/JUCE/modules/juce_audio_processors_headless/format_types/VST3_SDK",
+					"$(SRCROOT)/../../JuceLibraryCode",
+					"/Applications/JUCE/modules",
+					"/Applications/JUCE/modules/juce_audio_plugin_client/AU",
+					"$(inherited)",
+				);
+				INFOPLIST_FILE = Info-Standalone_Plugin.plist;
+				INFOPLIST_PREPROCESS = NO;
+				LLVM_LTO = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_HEADER_SEARCH_PATHS = "/Applications/JUCE/modules/juce_audio_processors_headless/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode /Applications/JUCE/modules /Applications/JUCE/modules/juce_audio_plugin_client/AU";
+				OTHER_CFLAGS = "$(inherited)";
+				OTHER_CPLUSPLUSFLAGS = "$(inherited)";
+				OTHER_LDFLAGS = "$(inherited) -lCandle";
+				PRODUCT_BUNDLE_IDENTIFIER = com.rubblesonic.candle;
+				PRODUCT_NAME = "Candle";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				USE_HEADERMAP = NO;
+				VALID_ARCHS = "i386 x86_64 arm64 arm64e";
 			};
 			name = Release;
 		};
@@ -1649,7 +1985,7 @@
 					"JucePlugin_Build_AU=1",
 					"JucePlugin_Build_AUv3=0",
 					"JucePlugin_Build_AAX=0",
-					"JucePlugin_Build_Standalone=0",
+					"JucePlugin_Build_Standalone=1",
 					"JucePlugin_Build_Unity=0",
 					"JucePlugin_Build_LV2=0",
 					"JucePlugin_Enable_IAA=0",
@@ -1886,6 +2222,15 @@
 			buildConfigurations = (
 				0A26D4F18C518E6F8D235BD0,
 				4B957F5289677AA8C1992E30,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		88721199A2744CA29282C1CE = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				878CA70D17B5A5B9869544F9,
+				B7E0663A862040A3545BE480,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

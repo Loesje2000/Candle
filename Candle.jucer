@@ -6,7 +6,7 @@
               companyWebsite="https://rubblesonic.com" bundleIdentifier="com.rubblesonic.candle"
               pluginName="Candle" pluginDesc="Porta 424 cassette processor"
               pluginManufacturer="Rubblesonic" pluginManufacturerCode="RUBS"
-              pluginCode="CNDL" pluginFormats="buildAU,buildVST3"
+              pluginCode="CNDL" pluginFormats="buildAU,buildVST3,buildStandalone"
               pluginAUExportPrefix="CandleAU" pluginAUMainType="'aufx'" pluginVSTCategory="kPlugCategEffect"
               pluginVST3Category="Fx" cppLanguageStandard="17">
   <MAINGROUP id="main01" name="Candle">

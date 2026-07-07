@@ -52,6 +52,7 @@ private:
     juce::TextButton  savePresetButton { "SAVE PRESET" };
     juce::TextEditor  presetNameEditor;
     juce::TextButton  presetSaveConfirmButton { "OK" }, presetSaveCancelButton { "X" };
+    juce::TextButton  presetDeleteButton { "DELETE" }, presetRenameButton { "RENAME" };
 
     juce::ToggleButton tooltipToggle { "TOOLTIPS" };
 
@@ -65,13 +66,16 @@ private:
     struct PresetEntry { juce::String name; bool isFactory; int factoryIndex; int comboId; };
     std::vector<PresetEntry> presetEntries;
     int currentPresetIndex = -1;
+    bool isRenamingPreset = false;
 
     void rebuildPresetList();
     void selectPresetEntry (int index, bool applyToProcessor);
     void stepPreset (int delta);
     void beginSavePresetFlow();
+    void beginRenamePresetFlow();
     void confirmSavePreset();
     void cancelSavePreset();
+    void updatePresetManageButtonsEnabled();
 
     // ── Tooltip toggle (persisted via a small properties file) ───────────
     std::unique_ptr<juce::TooltipWindow>  tooltipWindow;

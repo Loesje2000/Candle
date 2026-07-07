@@ -45,6 +45,8 @@ public:
     juce::StringArray getUserPresetNames() const;
     bool saveUserPreset (const juce::String& name);
     bool loadUserPresetByName (const juce::String& name);
+    bool deleteUserPreset (const juce::String& name);
+    bool renameUserPreset (const juce::String& oldName, const juce::String& newName);
 
     float getVULevel()     const noexcept { return tape.getVULevel(); }
     float getInputMeterDb()  const noexcept { return inputMeterDb.load(); }
@@ -56,6 +58,8 @@ private:
 
     MicStage     mic;
     CassetteTape tape;
+    juce::dsp::Oversampling<float> oversampling
+        { 2, 1, juce::dsp::Oversampling<float>::filterHalfBandFIREquiripple, true, true };
     juce::SmoothedValue<float> outputGainSmooth;
     juce::AudioBuffer<float> drySafetyBuffer;
     bool wasBypassed = false;

@@ -12,6 +12,9 @@ CandleKnob::CandleKnob (const juce::String& label,
     addAndMakeVisible (slider);
     attachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (
         state, paramID, slider);
+
+    if (auto* param = state.getParameter (paramID))
+        slider.setDoubleClickReturnValue (true, param->convertFrom0to1 (param->getDefaultValue()));
 }
 
 void CandleKnob::resized()
