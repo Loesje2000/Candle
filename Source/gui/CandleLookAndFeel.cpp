@@ -2,22 +2,31 @@
 
 CandleLookAndFeel::CandleLookAndFeel()
 {
-    setColour (juce::ComboBox::backgroundColourId,   CandleColours::btnOff);
-    setColour (juce::ComboBox::outlineColourId,      CandleColours::panelBorder);
-    setColour (juce::ComboBox::textColourId,         CandleColours::cream);
+    setColour (juce::Slider::rotarySliderFillColourId,    CandleColours::amber);
+    setColour (juce::Slider::rotarySliderOutlineColourId, CandleColours::panelBorder.withAlpha (0.40f));
+    setColour (juce::Slider::textBoxTextColourId,         CandleColours::amberLo);
+    setColour (juce::Slider::textBoxOutlineColourId,      juce::Colours::transparentBlack);
+    setColour (juce::Slider::textBoxBackgroundColourId,   juce::Colours::transparentBlack);
+
+    setColour (juce::ComboBox::backgroundColourId,   CandleColours::btnOff.withAlpha (0.65f));
+    setColour (juce::ComboBox::outlineColourId,      CandleColours::panelBorder.withAlpha (0.45f));
+    setColour (juce::ComboBox::textColourId,         CandleColours::amber);
     setColour (juce::ComboBox::arrowColourId,        CandleColours::amber);
     setColour (juce::PopupMenu::backgroundColourId,              CandleColours::bg);
-    setColour (juce::PopupMenu::textColourId,                    CandleColours::cream);
-    setColour (juce::PopupMenu::highlightedBackgroundColourId,   CandleColours::amber.withAlpha (0.30f));
-    setColour (juce::PopupMenu::highlightedTextColourId,         CandleColours::creamBright);
+    setColour (juce::PopupMenu::textColourId,                    CandleColours::amberLo);
+    setColour (juce::PopupMenu::highlightedBackgroundColourId,   juce::Colour (0xff2b2018));
+    setColour (juce::PopupMenu::highlightedTextColourId,         CandleColours::amber);
 }
 
 juce::Font CandleLookAndFeel::getGeorgiaFont (float size, int style) const
 {
+    const auto styleName = (style & juce::Font::bold) != 0 && (style & juce::Font::italic) != 0 ? "Bold Italic"
+                         : (style & juce::Font::bold) != 0 ? "Bold"
+                         : (style & juce::Font::italic) != 0 ? "Italic"
+                         : "Regular";
     return juce::Font (juce::FontOptions()
         .withName ("Georgia")
-        .withStyle ((style & juce::Font::bold)   ? "Bold"
-                  : (style & juce::Font::italic) ? "Italic" : "Regular")
+        .withStyle (styleName)
         .withHeight (size));
 }
 
@@ -31,52 +40,63 @@ void CandleLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, int w
                                            float sliderPos, float startAngle, float endAngle,
                                            juce::Slider&)
 {
-    const float cx = x + w * 0.5f;
-    const float cy = y + h * 0.5f;
-    const float rOuter = juce::jmin (w, h) * 0.43f;
-    const float rInner = rOuter * 0.63f;
-    const float trackR = rOuter + 3.0f;
+    const float size = (float) juce::jmin (w, h);
+    const float radius = size * 0.5f - 2.0f;
+    const float cx = (float) x + (float) w * 0.5f;
+    const float cy = (float) y + (float) h * 0.5f;
+    const float angle = startAngle + sliderPos * (endAngle - startAngle);
+    const float strokeW = juce::jmax (2.0f, size * 0.032f);
+    const float dotR = juce::jmax (2.5f, size * 0.035f);
+    const float arcR = radius - strokeW * 0.5f - 2.0f;
 
-    // Track groove
+    g.setColour (juce::Colours::black.withAlpha (0.65f));
+    g.fillEllipse (cx - radius + 1.0f, cy - radius + 1.0f, radius * 2.0f - 2.0f, radius * 2.0f - 2.0f);
+
     juce::Path track;
-    track.addCentredArc (cx, cy, trackR, trackR, 0.0f, startAngle, endAngle, true);
-    g.setColour (CandleColours::knobTrack.withAlpha (0.7f));
-    g.strokePath (track, juce::PathStrokeType (3.0f, juce::PathStrokeType::curved,
+    track.addCentredArc (cx, cy, arcR, arcR, 0.0f, startAngle, endAngle, true);
+    g.setColour (CandleColours::knobTrack.withAlpha (0.55f));
+    g.strokePath (track, juce::PathStrokeType (strokeW, juce::PathStrokeType::curved,
                                                 juce::PathStrokeType::rounded));
 
-    // Amber fill arc
-    const float curAngle = startAngle + sliderPos * (endAngle - startAngle);
-    juce::Path fill;
-    fill.addCentredArc (cx, cy, trackR, trackR, 0.0f, startAngle, curAngle, true);
-    g.setColour (CandleColours::amber.withAlpha (0.80f));
-    g.strokePath (fill, juce::PathStrokeType (3.0f, juce::PathStrokeType::curved,
-                                               juce::PathStrokeType::rounded));
+    juce::Path value;
+    value.addCentredArc (cx, cy, arcR, arcR, 0.0f, startAngle, angle, true);
+    g.setColour (CandleColours::amberGlow);
+    g.strokePath (value, juce::PathStrokeType (strokeW + size * 0.035f, juce::PathStrokeType::curved,
+                                                juce::PathStrokeType::rounded));
+    g.setColour (CandleColours::amber);
+    g.strokePath (value, juce::PathStrokeType (strokeW, juce::PathStrokeType::curved,
+                                                juce::PathStrokeType::rounded));
 
-    // Outer ring (gradient)
-    juce::ColourGradient outer (CandleColours::knobBodyHi, cx - rOuter * 0.5f, cy - rOuter * 0.5f,
-                                CandleColours::bgDeep,     cx + rOuter * 0.5f, cy + rOuter * 0.5f, true);
-    g.setGradientFill (outer);
-    g.fillEllipse (cx - rOuter, cy - rOuter, rOuter * 2.0f, rOuter * 2.0f);
+    const float capR = radius * 0.76f;
+    juce::Rectangle<float> cap (cx - capR, cy - capR, capR * 2.0f, capR * 2.0f);
+    juce::ColourGradient body (CandleColours::knobBodyHi,
+                               cap.getX() + cap.getWidth() * 0.35f,
+                               cap.getY() + cap.getHeight() * 0.30f,
+                               CandleColours::bgDeep, cap.getRight(), cap.getBottom(), true);
+    body.addColour (0.55, CandleColours::knobBody);
+    g.setGradientFill (body);
+    g.fillEllipse (cap);
 
-    // Inner cap
-    juce::ColourGradient cap (CandleColours::knobBodyHi, cx, cy - rInner,
-                              CandleColours::bgDeep,     cx, cy + rInner, false);
-    g.setGradientFill (cap);
-    g.fillEllipse (cx - rInner, cy - rInner, rInner * 2.0f, rInner * 2.0f);
+    juce::ColourGradient gloss (juce::Colour (0x2effdcaa), cx - radius * 0.35f, cy - radius * 0.52f,
+                                juce::Colours::transparentBlack, cx - radius * 0.35f, cy - radius * 0.05f, false);
+    gloss.addColour (0.40, juce::Colour (0x0affdcaa));
+    g.setGradientFill (gloss);
+    g.fillEllipse (cx - radius * 0.58f, cy - radius * 0.58f, radius * 0.90f, radius * 0.60f);
 
-    // Specular rim
-    g.setColour (juce::Colours::white.withAlpha (0.07f));
-    g.drawEllipse (cx - rInner, cy - rInner, rInner * 2.0f, rInner * 2.0f, 0.8f);
+    juce::ColourGradient rim (juce::Colours::transparentBlack, cx, cy,
+                              juce::Colours::black.withAlpha (0.85f), cx + capR, cy, true);
+    rim.addColour (0.80, juce::Colours::transparentBlack);
+    rim.addColour (0.98, juce::Colours::black.withAlpha (0.55f));
+    g.setGradientFill (rim);
+    g.fillEllipse (cap);
 
-    // Amber indicator dot
-    const float dotR  = rInner * 0.17f;
-    const float dotD  = rInner * 0.67f;
-    const float dotX  = cx + dotD * std::sin (curAngle);
-    const float dotY  = cy - dotD * std::cos (curAngle);
-    g.setColour (CandleColours::amberHi);
+    const float dotX = cx + std::sin (angle) * radius * 0.55f;
+    const float dotY = cy - std::cos (angle) * radius * 0.55f;
+    g.setColour (CandleColours::amber.withAlpha (0.33f));
+    g.fillEllipse (dotX - dotR - size * 0.025f, dotY - dotR - size * 0.025f,
+                   (dotR + size * 0.025f) * 2.0f, (dotR + size * 0.025f) * 2.0f);
+    g.setColour (CandleColours::knobDot);
     g.fillEllipse (dotX - dotR, dotY - dotR, dotR * 2.0f, dotR * 2.0f);
-    g.setColour (CandleColours::amber.withAlpha (0.45f));
-    g.fillEllipse (dotX - dotR * 1.7f, dotY - dotR * 1.7f, dotR * 3.4f, dotR * 3.4f);
 }
 
 // ── Buttons ──────────────────────────────────────────────────────────────────
@@ -85,19 +105,38 @@ void CandleLookAndFeel::drawButtonBackground (juce::Graphics& g, juce::Button& b
 {
     const auto  r  = btn.getLocalBounds().toFloat().reduced (0.5f);
     const bool  on = btn.getToggleState();
-    juce::Colour fill = on  ? CandleColours::amber.withAlpha (down ? 1.0f : 0.88f)
-                            : CandleColours::btnOff.withAlpha (over ? 0.9f : 0.75f);
-    g.setColour (fill);
-    g.fillRoundedRectangle (r, 3.5f);
-    g.setColour (on ? CandleColours::amberLo : CandleColours::panelBorder.withAlpha (0.7f));
-    g.drawRoundedRectangle (r, 3.5f, 1.0f);
+    if (on)
+    {
+        g.setColour (juce::Colour (0x423c220d));
+        g.fillRoundedRectangle (r, 3.0f);
+        g.setColour (CandleColours::amber.withAlpha (0.13f));
+        g.fillRoundedRectangle (r, 3.0f);
+        g.setColour (CandleColours::amber.withAlpha (0.70f));
+        g.drawRoundedRectangle (r.reduced (-1.0f), 4.0f, 1.4f);
+    }
+    else
+    {
+        g.setColour (CandleColours::btnOff.withAlpha (0.55f));
+        g.fillRoundedRectangle (r, 3.0f);
+    }
+
+    if (over || down)
+    {
+        g.setColour (CandleColours::amber.withAlpha (0.13f));
+        g.fillRoundedRectangle (r, 3.0f);
+    }
+
+    g.setColour (on ? CandleColours::amber.withAlpha (0.70f) : CandleColours::panelRule.withAlpha (0.45f));
+    g.drawRoundedRectangle (r, 3.0f, 1.0f);
 }
 
 void CandleLookAndFeel::drawButtonText (juce::Graphics& g, juce::TextButton& btn, bool, bool)
 {
-    g.setFont (getGeorgiaFont (10.5f, juce::Font::bold));
-    g.setColour (btn.getToggleState() ? CandleColours::bg : CandleColours::cream);
-    g.drawText (btn.getButtonText(), btn.getLocalBounds(), juce::Justification::centred);
+    const float fitByHeight = (float) btn.getHeight() * 0.50f;
+    const float fitByWidth = (float) btn.getWidth() / juce::jmax (2.5f, (float) btn.getButtonText().length() * 0.62f);
+    g.setFont (getGeorgiaFont (juce::jlimit (7.0f, 12.0f, juce::jmin (fitByHeight, fitByWidth))));
+    g.setColour (btn.getToggleState() ? CandleColours::creamBright : CandleColours::amberLo);
+    g.drawText (btn.getButtonText(), btn.getLocalBounds().reduced (6, 2), juce::Justification::centred);
 }
 
 void CandleLookAndFeel::drawToggleButton (juce::Graphics& g, juce::ToggleButton& btn,
@@ -105,13 +144,18 @@ void CandleLookAndFeel::drawToggleButton (juce::Graphics& g, juce::ToggleButton&
 {
     const bool  on = btn.getToggleState();
     const auto  r  = btn.getLocalBounds().toFloat().reduced (0.5f);
-    g.setColour (on ? CandleColours::amber : CandleColours::btnOff.withAlpha (over ? 0.85f : 0.7f));
-    g.fillRoundedRectangle (r, r.getHeight() * 0.42f);
-    g.setColour (on ? CandleColours::amberLo : CandleColours::panelBorder.withAlpha (0.6f));
-    g.drawRoundedRectangle (r, r.getHeight() * 0.42f, 1.0f);
+    g.setColour (on ? juce::Colour (0x423c220d) : CandleColours::btnOff.withAlpha (0.55f));
+    g.fillRoundedRectangle (r, 3.0f);
+    if (on || over)
+    {
+        g.setColour (CandleColours::amber.withAlpha (on ? 0.18f : 0.11f));
+        g.fillRoundedRectangle (r, 3.0f);
+    }
+    g.setColour (on ? CandleColours::amber.withAlpha (0.70f) : CandleColours::panelRule.withAlpha (0.45f));
+    g.drawRoundedRectangle (r, 3.0f, 1.0f);
     g.setFont (getGeorgiaFont (10.0f, juce::Font::bold));
-    g.setColour (on ? CandleColours::bg : CandleColours::cream);
-    g.drawText (btn.getButtonText(), btn.getLocalBounds(), juce::Justification::centred);
+    g.setColour (on ? CandleColours::creamBright : CandleColours::amberLo);
+    g.drawText (btn.getButtonText(), btn.getLocalBounds().reduced (4, 1), juce::Justification::centred);
 }
 
 // ── Combo box ────────────────────────────────────────────────────────────────
@@ -119,10 +163,10 @@ void CandleLookAndFeel::drawComboBox (juce::Graphics& g, int w, int h, bool,
                                        int ax, int ay, int aw, int ah, juce::ComboBox&)
 {
     const auto r = juce::Rectangle<float> (0.0f, 0.0f, (float) w, (float) h);
-    g.setColour (CandleColours::btnOff);
-    g.fillRoundedRectangle (r, 3.5f);
-    g.setColour (CandleColours::panelBorder.withAlpha (0.8f));
-    g.drawRoundedRectangle (r.reduced (0.5f), 3.5f, 1.0f);
+    g.setColour (CandleColours::btnOff.withAlpha (0.65f));
+    g.fillRoundedRectangle (r.reduced (0.5f), 3.0f);
+    g.setColour (CandleColours::panelBorder.withAlpha (0.45f));
+    g.drawRoundedRectangle (r.reduced (0.5f), 3.0f, 1.0f);
 
     juce::Path arrow;
     const float acx = ax + aw * 0.5f;
@@ -138,7 +182,7 @@ void CandleLookAndFeel::drawComboBox (juce::Graphics& g, int w, int h, bool,
 
 void CandleLookAndFeel::positionComboBoxText (juce::ComboBox& box, juce::Label& label)
 {
-    label.setBounds (6, 1, box.getWidth() - 26, box.getHeight() - 2);
+    label.setBounds (8, 1, box.getWidth() - 32, box.getHeight() - 2);
     label.setFont (getComboBoxFont (box));
 }
 
@@ -155,7 +199,7 @@ void CandleLookAndFeel::drawPopupMenuBackground (juce::Graphics& g, int w, int h
 {
     g.setColour (CandleColours::bg);
     g.fillRect (0, 0, w, h);
-    g.setColour (CandleColours::panelBorder.withAlpha (0.6f));
+    g.setColour (CandleColours::panelBorder.withAlpha (0.45f));
     g.drawRect (0, 0, w, h, 1);
 }
 
@@ -168,15 +212,19 @@ void CandleLookAndFeel::drawPopupMenuItem (juce::Graphics& g,
 {
     if (isSeparator) { g.setColour (CandleColours::panelBorder.withAlpha (0.35f));
                        g.fillRect (area.getX() + 6, area.getCentreY(), area.getWidth() - 12, 1); return; }
-    if (isHighlighted) { g.setColour (CandleColours::amber.withAlpha (0.22f)); g.fillRect (area); }
+    if (isHighlighted) { g.setColour (juce::Colour (0xff2b2018)); g.fillRect (area); }
     g.setFont (getPopupMenuFont());
-    g.setColour (isActive ? CandleColours::cream : CandleColours::creamDim);
+    g.setColour (isActive ? CandleColours::amberLo : CandleColours::creamDim);
     g.drawText (text, area.getX() + 12, area.getY(), area.getWidth() - 16, area.getHeight(),
                 juce::Justification::centredLeft);
     if (isTicked) { g.setColour (CandleColours::amber);
                     g.drawText ("*", area.getX() + 3, area.getY(), 10, area.getHeight(), juce::Justification::centred); }
 }
 
-juce::Font CandleLookAndFeel::getLabelFont (juce::Label&)     { return getGeorgiaFont (10.5f); }
-juce::Font CandleLookAndFeel::getComboBoxFont (juce::ComboBox&) { return getGeorgiaFont (10.5f); }
+juce::Font CandleLookAndFeel::getLabelFont (juce::Label&)     { return getGeorgiaFont (11.0f); }
+juce::Font CandleLookAndFeel::getComboBoxFont (juce::ComboBox& box)
+{
+    const float fitByHeight = (float) box.getHeight() * 0.46f;
+    return getGeorgiaFont (juce::jlimit (7.0f, 13.0f, fitByHeight));
+}
 juce::Font CandleLookAndFeel::getPopupMenuFont()               { return getGeorgiaFont (11.5f); }

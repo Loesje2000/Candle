@@ -3,42 +3,41 @@
 
 namespace CandleColours
 {
-    // ── Chassis ──────────────────────────────────────────────────────────────
-    const juce::Colour bg     { 0xff141210 };   // very dark warm black
-    const juce::Colour bgDeep { 0xff0C0A08 };
+    // ── BuckleyHaze chassis palette ────────────────────────────────────────
+    const juce::Colour bg     { 0xff1a0f08 };
+    const juce::Colour bgDeep { 0xff0e0703 };
 
-    // ── Panel sections (dark warm gray — not cream) ───────────────────────
-    const juce::Colour panel       { 0xff1E1A16 };
-    const juce::Colour panelHi     { 0xff28221C };
-    const juce::Colour panelLo     { 0xff161210 };
-    const juce::Colour panelBorder { 0xff3C3028 };
-    const juce::Colour panelRule   { 0xff4E4030 };
+    const juce::Colour panel       { 0xff1a0e07 };
+    const juce::Colour panelHi     { 0xff211008 };
+    const juce::Colour panelLo     { 0xff0e0703 };
+    const juce::Colour panelBorder { 0xff78502d };
+    const juce::Colour panelRule   { 0xffb4824b };
 
     // ── Text ─────────────────────────────────────────────────────────────────
-    const juce::Colour cream       { 0xffEEE4C4 };
-    const juce::Colour creamDim    { 0xff7A6E54 };
-    const juce::Colour creamBright { 0xffFAF2DC };
+    const juce::Colour cream       { 0xfff3ecd0 };
+    const juce::Colour creamDim    { 0x8cc89664 };
+    const juce::Colour creamBright { 0xffffdca0 };
 
     // ── Amber brand accent ────────────────────────────────────────────────────
-    const juce::Colour amber       { 0xffC8882A };
-    const juce::Colour amberHi     { 0xffFFD070 };
-    const juce::Colour amberLo     { 0xffA06618 };
-    const juce::Colour amberGlow   { 0x44C8882A };
+    const juce::Colour amber       { 0xffe8b66a };
+    const juce::Colour amberHi     { 0xfff3c878 };
+    const juce::Colour amberLo     { 0xffc89860 };
+    const juce::Colour amberGlow   { 0x42e8b66a };
 
     // ── Knob ─────────────────────────────────────────────────────────────────
-    const juce::Colour knobBody    { 0xff242018 };
-    const juce::Colour knobBodyHi  { 0xff383028 };
-    const juce::Colour knobDot     { 0xffC8882A };
-    const juce::Colour knobTrack   { 0xff181410 };
+    const juce::Colour knobBody    { 0xff1d0e08 };
+    const juce::Colour knobBodyHi  { 0xff3a241a };
+    const juce::Colour knobDot     { 0xfff3c878 };
+    const juce::Colour knobTrack   { 0xff78502d };
 
-    // ── Rubblesonic badge (sage green — matches other RS plugins) ─────────────
-    const juce::Colour badgeHi     { 0xff6F8068 };
-    const juce::Colour badgeLo     { 0xff4D5C48 };
-    const juce::Colour badgeText   { 0xffECE4CA };
+    // ── Rubblesonic badge (BuckleyHaze sage) ────────────────────────────────
+    const juce::Colour badgeHi     { 0xff7d8d72 };
+    const juce::Colour badgeLo     { 0xff56644f };
+    const juce::Colour badgeText   { 0xfff3ecd0 };
 
     // ── Toggle / button ───────────────────────────────────────────────────────
-    const juce::Colour btnOff      { 0xff1C1814 };
-    const juce::Colour btnOffBd    { 0xff3C3028 };
+    const juce::Colour btnOff      { 0xff140b06 };
+    const juce::Colour btnOffBd    { 0xff78502d };
 
     // ── LED / indicator ───────────────────────────────────────────────────────
     const juce::Colour ledOff      { 0xff2A1A08 };

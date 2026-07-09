@@ -1,6 +1,6 @@
 # Candle TODO
 
-Updated: 2026-07-07
+Updated: 2026-07-09
 
 ## Completed
 
@@ -16,9 +16,16 @@ Updated: 2026-07-07
 - Ran AU validation successfully.
 - Installed AU, VST3, and Standalone app into systemwide folders.
 - Verified systemwide bundle code signatures.
+- Reworked the GUI to the "BuckleyHaze" warm amber/cream theme (knobs, buttons, toggles, combo boxes, panel titles, header/badge).
+- Fixed the panel-title vs. knob overlap introduced by that redesign (MIXER/TRIM and OUTPUT/OUTPUT knob) — confirmed fixed by the user.
+- Fixed mojibake in tooltip strings (em dash / plus-minus rendering as garbage characters) by removing non-ASCII punctuation from tooltip text.
+- Redesigned the VU meter to a proper pivoting-arc analog meter (shared pivot for ticks/labels/needle, red danger-zone arc) — not yet visually confirmed.
 
 ## Remaining
 
+- Visually confirm the new VU meter in the running app (this session's automated screenshot attempts failed — no Screen Recording permission in this environment) and tune the arc/angle/spacing if it doesn't look right.
+- Re-run a full Release build (`xcodebuild -configuration Release -alltargets build`) and AU validation (`auval -v aufx CNDL RUBS`) now that the GUI has changed — only Debug Standalone was built this session.
+- Re-install updated Release AU/VST3/Standalone into the systemwide plugin folders once the Release build is confirmed good.
 - Manually launch the Standalone app and verify:
   - Audio passes cleanly with no silence, NaNs, or garbage output.
   - Saturation sounds smooth and behaves as expected.

@@ -28,8 +28,8 @@ void CandleKnob::paint (juce::Graphics& g)
     const int labelH = 14;
     const auto labelR = juce::Rectangle<int> (0, getHeight() - labelH, getWidth(), labelH);
     g.setFont (juce::Font (juce::FontOptions().withName ("Georgia")
-                                              .withStyle ("Regular")
-                                              .withHeight (8.5f)));
-    g.setColour (CandleColours::creamDim);
+                                              .withStyle ("Bold")
+                                              .withHeight (9.5f)));
+    g.setColour (CandleColours::amberLo);
     g.drawText (labelText, labelR, juce::Justification::centred);
 }

@@ -97,10 +97,10 @@ CandleAudioProcessorEditor::CandleAudioProcessorEditor (CandleAudioProcessor& p)
     root.addAndMakeVisible (savePresetButton);
 
     presetNameEditor.setColour (juce::TextEditor::backgroundColourId, CandleColours::btnOff);
-    presetNameEditor.setColour (juce::TextEditor::outlineColourId,    CandleColours::panelBorder);
+    presetNameEditor.setColour (juce::TextEditor::outlineColourId,    CandleColours::panelBorder.withAlpha (0.45f));
     presetNameEditor.setColour (juce::TextEditor::focusedOutlineColourId, CandleColours::amber);
-    presetNameEditor.setColour (juce::TextEditor::textColourId,       CandleColours::cream);
-    presetNameEditor.setFont (lookAndFeel.getGeorgiaFont (11.0f));
+    presetNameEditor.setColour (juce::TextEditor::textColourId,       CandleColours::amber);
+    presetNameEditor.setFont (lookAndFeel.getGeorgiaFont (12.0f));
     presetNameEditor.onReturnKey = [this] { confirmSavePreset(); };
     presetNameEditor.onEscapeKey = [this] { cancelSavePreset(); };
     presetSaveConfirmButton.onClick = [this] { confirmSavePreset(); };
@@ -143,28 +143,28 @@ CandleAudioProcessorEditor::CandleAudioProcessorEditor (CandleAudioProcessor& p)
     root.addAndMakeVisible (tooltipToggle);
 
     // ── Tooltips ─────────────────────────────────────────────────────────
-    knobTrim->setTooltip   ("Input trim — set recording level before the tape chain (±20 dB)");
-    knobEqHigh->setTooltip ("Mixer high shelf — boosts or cuts above 10 kHz before tape (±10 dB)");
-    knobEqLow->setTooltip  ("Mixer low shelf — boosts or cuts below 100 Hz before tape (±10 dB)");
-    micButton.setTooltip   ("RadioShack Realistic mic emulation — shapes tone like the cheap "
+    knobTrim->setTooltip   ("Input trim - set recording level before the tape chain (+/-20 dB)");
+    knobEqHigh->setTooltip ("Mixer high shelf - boosts or cuts above 10 kHz before tape (+/-10 dB)");
+    knobEqLow->setTooltip  ("Mixer low shelf - boosts or cuts below 100 Hz before tape (+/-10 dB)");
+    micButton.setTooltip   ("RadioShack Realistic mic emulation - shapes tone like the cheap "
                             "dynamic mic Elliott Smith used for vocals on Candle");
-    dbxButton.setTooltip   ("DBX Type II noise reduction — on = quieter hiss, off = raw open-reel "
+    dbxButton.setTooltip   ("DBX Type II noise reduction - on = quieter hiss, off = raw open-reel "
                             "noise floor (Smith often bypassed or had a faulty DBX)");
-    speedCombo.setTooltip  ("Tape speed — HIGH (3¾ ips) is cleanest, NORM (1⅞ ips) is the "
+    speedCombo.setTooltip  ("Tape speed - HIGH (3-3/4 ips) is cleanest, NORM (1-7/8 ips) is the "
                             "Candle speed, SLOW (15/16 ips) is maximum degradation");
-    genCombo.setTooltip    ("Bounce generations — each ping-pong overdub adds noise and rolls off "
+    genCombo.setTooltip    ("Bounce generations - each ping-pong overdub adds noise and rolls off "
                             "high frequencies, as on multi-tracked cassette recordings");
-    knobSat->setTooltip    ("Tape saturation — how hard the ferric oxide is driven; adds "
+    knobSat->setTooltip    ("Tape saturation - how hard the ferric oxide is driven; adds "
                             "2nd-harmonic warmth and soft limiting");
-    knobNoise->setTooltip  ("Tape hiss + AC hum level — at zero the noise floor is fully suppressed; "
+    knobNoise->setTooltip  ("Tape hiss + AC hum level - at zero the noise floor is fully suppressed; "
                             "Candle preset sits around 55%");
-    knobWow->setTooltip    ("Wow & flutter — slow pitch drift (wow) and fast capstan wobble (flutter) "
+    knobWow->setTooltip    ("Wow & flutter - slow pitch drift (wow) and fast capstan wobble (flutter) "
                             "from the 424's transport mechanism");
-    knobAge->setTooltip    ("Head wear — increases HF loss, dropout frequency, and print-through "
+    knobAge->setTooltip    ("Head wear - increases HF loss, dropout frequency, and print-through "
                             "post-echo; simulates a heavily used transport");
-    knobOutput->setTooltip ("Output level after the full tape chain (±12 dB)");
-    bypassButton.setTooltip ("Bypass the entire tape chain — dry signal passes through unchanged");
-    presetCombo.setTooltip  ("Factory presets — Candle, Porta, Bounce x3, Late Night, "
+    knobOutput->setTooltip ("Output level after the full tape chain (+/-12 dB)");
+    bypassButton.setTooltip ("Bypass the entire tape chain - dry signal passes through unchanged");
+    presetCombo.setTooltip  ("Factory presets - Candle, Porta, Bounce x3, Late Night, "
                              "New Tape");
     presetPrevButton.setTooltip ("Previous preset");
     presetNextButton.setTooltip ("Next preset");
@@ -390,16 +390,16 @@ void CandleAudioProcessorEditor::resized()
     outputPanel = { kOutX,  kBodyY, kOutW,  kBodyH };
 
     // ── BYPASS in header (top right, left of badge) ────────────────────
-    bypassButton.setBounds (680, 15, 74, 24);
+    bypassButton.setBounds (710, 15, 58, 24);
 
     // ── MIXER (channel strip: TRIM top, EQ HIGH + EQ LOW below, REALISTIC foot)
     constexpr int kBigKnob = 68;   // TRIM (prominent, top of strip)
     constexpr int kSmKnob  = 54;   // EQ knobs
 
     const int trimX = (kMixW - kBigKnob) / 2;
-    knobTrim->setBounds   (trimX, kBodyY + 18, kBigKnob, kBigKnob + 14);
+    knobTrim->setBounds   (trimX, kBodyY + 38, kBigKnob, kBigKnob + 14);
 
-    const int eqY   = kBodyY + 18 + kBigKnob + 14 + 8;
+    const int eqY   = kBodyY + 38 + kBigKnob + 14 + 8;
     const int eqGap = (kMixW - kSmKnob * 2) / 3;
     knobEqHigh->setBounds (eqGap,             eqY, kSmKnob, kSmKnob + 14);
     knobEqLow->setBounds  (eqGap * 2 + kSmKnob, eqY, kSmKnob, kSmKnob + 14);
@@ -408,14 +408,14 @@ void CandleAudioProcessorEditor::resized()
     micButton.setBounds (10, micY, kMixW - 20, 22);
 
     // ── TAPE controls row 1: DBX  SPEED  GEN ─────────────────────────────
-    const int row1Y = kBodyY + 16;
+    const int row1Y = kBodyY + 36;
     dbxButton.setBounds  (kTapeX + 8,   row1Y, 52, 22);
     speedCombo.setBounds (kTapeX + 68,  row1Y, 130, 22);
     genCombo.setBounds   (kTapeX + 208, row1Y, 108, 22);
 
     // TAPE knob row: SAT  NOISE  WOW/FLT  AGE  (evenly spaced in 390px)
     constexpr int kTapeKnob = 62;
-    const int tapeKnobY  = kBodyY + 50;
+    const int tapeKnobY  = kBodyY + 70;
     const int tapeKnobSp = (kTapeW - kTapeKnob * 4) / 5;
     knobSat->setBounds   (kTapeX + tapeKnobSp,                             tapeKnobY, kTapeKnob, kTapeKnob + 14);
     knobNoise->setBounds (kTapeX + tapeKnobSp * 2 + kTapeKnob,             tapeKnobY, kTapeKnob, kTapeKnob + 14);
@@ -425,7 +425,7 @@ void CandleAudioProcessorEditor::resized()
     // ── OUTPUT: big knob + preset row + save row + tooltip toggle ────────
     constexpr int kOutKnob = 80;
     const int outKnobX = kOutX + (kOutW - kOutKnob) / 2;
-    knobOutput->setBounds (outKnobX, kBodyY + 20, kOutKnob, kOutKnob + 14);
+    knobOutput->setBounds (outKnobX, kBodyY + 38, kOutKnob, kOutKnob + 14);
 
     constexpr int kArrowW = 20;
     constexpr int kRowGap = 4;
@@ -480,57 +480,79 @@ void CandleAudioProcessorEditor::paintOverChildren (juce::Graphics& g)
     // Animated VU needle
     const float vuDb = vuDisplayLevel > 1.0e-6f
                      ? juce::Decibels::gainToDecibels (vuDisplayLevel) + 18.0f : -99.0f;
-    drawVUMeter      (g, { 390.0f, 6.0f, 140.0f, 42.0f }, vuDb);
-    drawSegmentMeter (g, { 542.0f, 10.0f, 30.0f, 30.0f }, inMeterNorm,  "IN");
-    drawSegmentMeter (g, { 578.0f, 10.0f, 30.0f, 30.0f }, outMeterNorm, "OUT");
+    drawVUMeter      (g, { 540.0f, 6.0f, 96.0f, 42.0f }, vuDb);
+    drawSegmentMeter (g, { 642.0f, 10.0f, 28.0f, 30.0f }, inMeterNorm,  "IN");
+    drawSegmentMeter (g, { 674.0f, 10.0f, 28.0f, 30.0f }, outMeterNorm, "OUT");
 }
 
 // ── Drawing helpers ────────────────────────────────────────────────────────────
 
 void CandleAudioProcessorEditor::drawBackground (juce::Graphics& g)
 {
-    g.setColour (CandleColours::bg);
+    juce::ColourGradient linear (CandleColours::panelHi, 0.0f, 0.0f,
+                                 CandleColours::panelLo, 0.0f, 360.0f, false);
+    linear.addColour (0.45, CandleColours::panel);
+    g.setGradientFill (linear);
+    g.fillRoundedRectangle (0.0f, 0.0f, 780.0f, 360.0f, 6.0f);
+
+    juce::ColourGradient radial (CandleColours::panelHi, 234.0f, 108.0f,
+                                 CandleColours::panelLo, 741.0f, 306.0f, true);
+    radial.addColour (0.55, CandleColours::panel);
+    g.setGradientFill (radial);
+    g.fillRoundedRectangle (0.0f, 0.0f, 780.0f, 360.0f, 6.0f);
+
+    juce::ColourGradient spot (CandleColours::amber.withAlpha (0.18f), 165.0f, 120.0f,
+                               juce::Colours::transparentBlack, 470.0f, 285.0f, true);
+    spot.addColour (0.55, CandleColours::amber.withAlpha (0.08f));
+    g.setGradientFill (spot);
     g.fillRect (0, 0, 780, 360);
 
     // Subtle warm grain
     juce::Random rng (77);
-    g.setColour (juce::Colours::white.withAlpha (0.008f));
+    g.setColour (juce::Colours::white.withAlpha (0.006f));
     for (int i = 0; i < 600; ++i)
         g.fillRect (rng.nextFloat() * 780.0f, rng.nextFloat() * 360.0f,
                     rng.nextFloat() * 1.5f + 0.5f, rng.nextFloat() * 1.5f + 0.5f);
+
+    g.setColour (juce::Colours::black.withAlpha (0.04f));
+    for (int y = 0; y < 360; y += 4)
+        g.fillRect (0, y, 780, 1);
 }
 
 void CandleAudioProcessorEditor::drawHeader (juce::Graphics& g, juce::Rectangle<float> r)
 {
-    // Header strip — fractionally lighter than chassis
-    g.setColour (CandleColours::panelLo.brighter (0.04f));
+    // BuckleyHaze-style top rail over Candle's cassette/VU hardware.
+    g.setColour (juce::Colour (0x8c160c07));
     g.fillRect (r);
-    g.setColour (CandleColours::panelBorder.withAlpha (0.5f));
+    g.setColour (CandleColours::panelRule.withAlpha (0.35f));
     g.drawLine (r.getX(), r.getBottom(), r.getRight(), r.getBottom(), 1.0f);
+    g.setColour (juce::Colours::white.withAlpha (0.04f));
+    g.fillRect (r.withHeight (1.0f).reduced (1.0f, 0.0f));
 
-    // ── Rubblesonic badge — TOP LEFT, rotated ─────────────────────────────
-    drawRubblesonicBadge (g, { 4.0f, 4.0f, 14.0f, 46.0f });
+    drawRubblesonicBadge (g, { 8.0f, 7.0f, 145.0f, 40.0f });
 
-    // ── CANDLE title ──────────────────────────────────────────────────────
-    g.setFont (lookAndFeel.getGeorgiaFont (27.0f, juce::Font::bold));
-    g.setColour (CandleColours::cream);
-    g.drawText ("CANDLE", 22, 5, 150, 30, juce::Justification::centredLeft);
+    g.setFont (lookAndFeel.getGeorgiaFont (30.0f, juce::Font::bold | juce::Font::italic));
+    g.setColour (CandleColours::amber.withAlpha (0.20f));
+    g.drawText ("CANDLE", 171, 5, 150, 31, juce::Justification::centredLeft);
+    g.setColour (CandleColours::amberHi);
+    g.drawText ("CANDLE", 169, 3, 150, 31, juce::Justification::centredLeft);
 
-    g.setFont (lookAndFeel.getGeorgiaFont (9.0f, juce::Font::italic));
+    g.setFont (lookAndFeel.getGeorgiaFont (8.0f, juce::Font::bold));
     g.setColour (CandleColours::creamDim);
-    g.drawText ("PORTA  424", 23, 35, 150, 14, juce::Justification::centredLeft);
+    g.drawText ("P O R T A  4 2 4  .  C A S S E T T E",
+                171, 36, 188, 13, juce::Justification::centredLeft);
 
     g.setFont (lookAndFeel.getMonoFont (7.0f));
     g.setColour (CandleColours::creamDim.withAlpha (0.78f));
-    g.drawText ("v" JucePlugin_VersionString "  qa-20260707e",
-                616, 35, 58, 12, juce::Justification::centredRight);
+    g.drawText ("v" JucePlugin_VersionString,
+                310, 36, 45, 12, juce::Justification::centredRight);
 
     // ── Cassette window (center of header) ────────────────────────────────
-    drawCassetteWindow (g, { 178.0f, 4.0f, 204.0f, 46.0f });
+    drawCassetteWindow (g, { 360.0f, 4.0f, 174.0f, 46.0f });
 
     // ── VU + meters placeholders (filled in paintOverChildren) ────────────
     g.setColour (CandleColours::vuBezel);
-    g.fillRoundedRectangle (390.0f, 6.0f, 140.0f, 42.0f, 3.0f);
+    g.fillRoundedRectangle (540.0f, 6.0f, 96.0f, 42.0f, 3.0f);
 }
 
 void CandleAudioProcessorEditor::drawCassetteWindow (juce::Graphics& g, juce::Rectangle<float> r)
@@ -605,47 +627,105 @@ void CandleAudioProcessorEditor::drawVUMeter (juce::Graphics& g,
     g.drawRoundedRectangle (r.reduced (0.5f), 3.0f, 0.8f);
 
     const auto face = r.reduced (3.5f, 3.5f);
-    g.setColour (CandleColours::vuFace);
+    juce::ColourGradient faceGrad (CandleColours::vuFace.brighter (0.06f),
+                                    face.getCentreX(), face.getY(),
+                                    CandleColours::vuFace.darker (0.10f),
+                                    face.getX(), face.getBottom(), true);
+    g.setGradientFill (faceGrad);
     g.fillRoundedRectangle (face, 1.5f);
 
-    // Scale marks
-    const float scaleDb[]  = { -20.0f, -10.0f, -7.0f, -3.0f, 0.0f, 3.0f };
-    const char* scaleLabel[] = { "-20", "-10", "-7", "-3", "0", "+3" };
-    const float sw  = face.getWidth() * 0.88f;
-    const float sx0 = face.getX() + face.getWidth() * 0.06f;
-    auto vuToX = [&] (float db) { return sx0 + juce::jlimit (0.0f, 1.0f, (db + 20.0f) / 23.0f) * sw; };
+    // ── Real VU meters swing a long needle pivoting well below the glass, so
+    // the visible arc near the top is broad and shallow rather than a tight
+    // fan. Pivot is placed off-screen below the face and clipped to it.
+    const float px        = face.getCentreX();
+    const float needleLen = face.getHeight() * 2.0f;
+    const float topY      = face.getY() + 2.5f;
+    const float py        = topY + needleLen;
 
-    g.setFont (lookAndFeel.getMonoFont (5.0f));
-    for (int i = 0; i < 6; ++i)
+    const float halfW    = face.getWidth() * 0.5f - 3.0f;
+    const float maxAngle = std::asin (juce::jlimit (-0.98f, 0.98f, halfW / needleLen));
+    const float leftAngle  = -maxAngle;
+    const float rightAngle =  maxAngle;
+
+    constexpr float kMinDb = -24.0f, kMaxDb = 6.0f;   // slightly wider than the ticks so +/- glyphs sit outboard
+    auto vuToAngle = [&] (float db)
     {
-        const float mx = vuToX (scaleDb[i]);
-        const bool  red = scaleDb[i] >= 0.0f;
-        g.setColour (red ? CandleColours::vuRed : CandleColours::vuNeedle.withAlpha (0.5f));
-        g.drawLine (mx, face.getY() + 3.0f, mx, face.getY() + 7.5f, 0.7f);
-        g.setColour (red ? CandleColours::vuRed : CandleColours::vuNeedle.withAlpha (0.65f));
-        g.drawText (scaleLabel[i], (int)(mx - 8), (int)(face.getY() + 7), 16, 7,
-                    juce::Justification::centred);
+        const float t = juce::jlimit (0.0f, 1.0f, (db - kMinDb) / (kMaxDb - kMinDb));
+        return leftAngle + t * (rightAngle - leftAngle);
+    };
+    auto pointOnArc = [&] (float angle, float radius)
+    {
+        return juce::Point<float> (px + radius * std::sin (angle), py - radius * std::cos (angle));
+    };
+
+    {
+        juce::Graphics::ScopedSaveState clip (g);
+        g.reduceClipRegion (face.toNearestInt());
+
+        const float outerR = needleLen - 1.5f;
+        const float tickInnerR  = outerR - 4.5f;
+        const float labelR      = tickInnerR - 5.5f;
+
+        // Scale arc: black across the working range, red over the last few dB
+        juce::Path scaleArc;
+        scaleArc.addCentredArc (px, py, outerR, outerR, 0.0f,
+                                 vuToAngle (-20.0f), vuToAngle (0.0f), true);
+        g.setColour (CandleColours::vuNeedle.withAlpha (0.55f));
+        g.strokePath (scaleArc, juce::PathStrokeType (0.7f));
+
+        juce::Path redArc;
+        redArc.addCentredArc (px, py, outerR, outerR, 0.0f,
+                               vuToAngle (0.0f), vuToAngle (3.0f), true);
+        g.setColour (CandleColours::vuRed.withAlpha (0.85f));
+        g.strokePath (redArc, juce::PathStrokeType (0.9f));
+
+        struct Tick { float db; const char* label; bool red; };
+        const Tick ticks[] = {
+            { -20.0f, "20", false }, { -10.0f, "10", false }, { -7.0f, "7", false },
+            { -5.0f,  "5",  false }, { -3.0f,  "3",  false }, { -1.0f, "1", false },
+            {  0.0f,  "",   false }, {  3.0f,  "3",  true  },
+        };
+
+        g.setFont (lookAndFeel.getMonoFont (4.6f));
+        for (const auto& t : ticks)
+        {
+            const float a  = vuToAngle (t.db);
+            const auto  p1 = pointOnArc (a, tickInnerR);
+            const auto  p2 = pointOnArc (a, outerR);
+            g.setColour (t.red ? CandleColours::vuRed : CandleColours::vuNeedle.withAlpha (0.60f));
+            g.drawLine (p1.x, p1.y, p2.x, p2.y, t.db == 0.0f ? 1.0f : 0.7f);
+
+            if (t.label[0] != '\0')
+            {
+                const auto lp = pointOnArc (a, labelR);
+                g.setColour (t.red ? CandleColours::vuRed : CandleColours::vuNeedle.withAlpha (0.70f));
+                g.drawText (t.label, (int) (lp.x - 7), (int) (lp.y - 4), 14, 8,
+                            juce::Justification::centred);
+            }
+        }
+
+        // "-" / "+" end glyphs, outboard of the numbered ticks
+        const auto minusP = pointOnArc (vuToAngle (kMinDb + 2.0f), labelR);
+        const auto plusP  = pointOnArc (vuToAngle (kMaxDb - 2.0f), labelR);
+        g.setColour (CandleColours::vuNeedle.withAlpha (0.60f));
+        g.drawText ("-", (int) (minusP.x - 5), (int) (minusP.y - 4), 10, 8, juce::Justification::centred);
+        g.setColour (CandleColours::vuRed.withAlpha (0.85f));
+        g.drawText ("+", (int) (plusP.x - 5), (int) (plusP.y - 4), 10, 8, juce::Justification::centred);
+
+        // Needle
+        const float na = vuToAngle (juce::jlimit (-20.0f, 3.0f, vuDb));
+        const auto  tip = pointOnArc (na, needleLen - 3.0f);
+        g.setColour (CandleColours::vuNeedle.withAlpha (0.15f));
+        g.drawLine (px + 0.6f, py + 0.6f, tip.x + 0.6f, tip.y + 0.6f, 1.1f);
+        g.setColour (CandleColours::vuNeedle);
+        g.drawLine (px, py, tip.x, tip.y, 0.8f);
+        g.fillEllipse (px - 1.3f, py - 1.3f, 2.6f, 2.6f);
     }
 
-    // Needle
-    const float px = face.getCentreX();
-    const float py = face.getBottom() + 8.0f;
-    const float nr = face.getWidth() * 0.57f;
-    const float na = juce::MathConstants<float>::pi *
-                     (-0.36f + juce::jlimit (0.0f, 1.0f, (juce::jlimit (-20.0f, 3.0f, vuDb) + 20.0f) / 23.0f) * 0.73f)
-                     - juce::MathConstants<float>::halfPi;
-    const float nx = px + nr * std::cos (na);
-    const float ny = py + nr * std::sin (na);
-    g.setColour (CandleColours::vuNeedle.withAlpha (0.12f));
-    g.drawLine (px + 1.0f, py + 1.0f, nx + 1.0f, ny + 1.0f, 1.2f);
-    g.setColour (CandleColours::vuNeedle);
-    g.drawLine (px, py, nx, ny, 0.9f);
-    g.fillEllipse (px - 1.5f, py - 1.5f, 3.0f, 3.0f);
-
-    g.setFont (lookAndFeel.getGeorgiaFont (6.0f, juce::Font::bold));
-    g.setColour (CandleColours::vuNeedle.withAlpha (0.45f));
-    g.drawText ("VU", (int) face.getRight() - 14, (int) face.getY() + 2, 13, 8,
-                juce::Justification::centredRight);
+    g.setFont (lookAndFeel.getGeorgiaFont (7.0f, juce::Font::bold | juce::Font::italic));
+    g.setColour (CandleColours::vuNeedle.withAlpha (0.75f));
+    g.drawText ("VU", face.withY (face.getBottom() - 10.0f).withHeight (10.0f),
+                juce::Justification::centred);
 }
 
 void CandleAudioProcessorEditor::drawSegmentMeter (juce::Graphics& g,
@@ -679,49 +759,55 @@ void CandleAudioProcessorEditor::drawPanelSection (juce::Graphics& g,
                                                      juce::Rectangle<float> r,
                                                      const juce::String& title)
 {
-    // Dark panel body
-    juce::ColourGradient grad (CandleColours::panelHi, r.getX(), r.getY(),
-                               CandleColours::panelLo,  r.getX(), r.getBottom(), false);
+    const auto rail = r.reduced (6.0f, 8.0f);
+    juce::ColourGradient grad (juce::Colour (0x8c160c07), rail.getX(), rail.getY(),
+                               juce::Colour (0xff0e0703), rail.getX(), rail.getBottom(), false);
+    grad.addColour (0.45, CandleColours::panel);
     g.setGradientFill (grad);
-    g.fillRect (r);
+    g.fillRoundedRectangle (rail, 4.0f);
 
-    // Border
-    g.setColour (CandleColours::panelBorder.withAlpha (0.9f));
-    g.drawRect (r, 1.0f);
+    g.setColour (CandleColours::panelRule.withAlpha (0.35f));
+    g.drawRoundedRectangle (rail, 4.0f, 1.0f);
+    g.setColour (juce::Colours::white.withAlpha (0.04f));
+    g.fillRect (rail.withHeight (1.0f).reduced (1.0f, 0.0f));
+    g.setColour (juce::Colours::black.withAlpha (0.50f));
+    g.fillRect (rail.withY (rail.getBottom() - 1.0f).withHeight (1.0f).reduced (1.0f, 0.0f));
 
-    // Title rule at top
-    const float titleH = 14.0f;
-    g.setColour (CandleColours::panelBorder.withAlpha (0.5f));
-    g.drawLine (r.getX() + 4.0f, r.getY() + titleH, r.getRight() - 4.0f, r.getY() + titleH, 0.8f);
+    const float textW = juce::jmax (58.0f, (float) title.length() * 13.0f);
+    const float lineY = rail.getY() + 16.0f;
+    const float leftEnd = rail.getCentreX() - textW * 0.5f;
+    const float rightStart = rail.getCentreX() + textW * 0.5f;
 
-    g.setFont (lookAndFeel.getGeorgiaFont (8.5f, juce::Font::bold));
-    g.setColour (CandleColours::amber.withAlpha (0.65f));
-    g.drawText (title, (int) r.getX() + 6, (int) r.getY() + 1,
-                (int) r.getWidth() - 8, (int) titleH - 1, juce::Justification::centredLeft);
+    g.setColour (CandleColours::panelRule.withAlpha (0.60f));
+    g.drawLine (rail.getX() + 10.0f, lineY, leftEnd, lineY, 1.0f);
+    g.drawLine (rightStart, lineY, rail.getRight() - 10.0f, lineY, 1.0f);
+
+    juce::Rectangle<float> plate (rail.getCentreX() - textW * 0.5f, lineY - 9.0f, textW, 18.0f);
+    g.setColour (juce::Colour (0x8c160c07));
+    g.fillRect (plate);
+
+    g.setFont (lookAndFeel.getGeorgiaFont (11.0f, juce::Font::bold));
+    g.setColour (CandleColours::amber);
+    g.drawText (title, plate.toNearestInt(), juce::Justification::centred);
 }
 
 void CandleAudioProcessorEditor::drawRubblesonicBadge (juce::Graphics& g, juce::Rectangle<float> r)
 {
-    // Sage-green pill — drawn vertically, label runs bottom-to-top
-    const auto pill = r.reduced (1.0f, 0.0f);
-    juce::ColourGradient grad (CandleColours::badgeHi, pill.getX(), pill.getY(),
-                               CandleColours::badgeLo,  pill.getX(), pill.getBottom(), false);
-    g.setGradientFill (grad);
-    g.fillRoundedRectangle (pill, pill.getWidth() * 0.4f);
-    g.setColour (CandleColours::badgeLo.darker (0.3f));
-    g.drawRoundedRectangle (pill.reduced (0.5f), pill.getWidth() * 0.4f, 0.8f);
+    juce::Graphics::ScopedSaveState saved (g);
+    g.addTransform (juce::AffineTransform::translation (r.getCentreX(), r.getCentreY())
+                        .rotated (juce::degreesToRadians (-5.0f)));
 
-    // Rotated "RUBBLESONIC" text
-    juce::Graphics::ScopedSaveState sss (g);
-    // Rotate around the badge centre, text runs upward (bottom-to-top)
-    g.addTransform (juce::AffineTransform::rotation (
-        -juce::MathConstants<float>::halfPi, r.getCentreX(), r.getCentreY()));
-    g.setFont (lookAndFeel.getGeorgiaFont (6.5f, juce::Font::bold));
-    g.setColour (CandleColours::badgeText.withAlpha (0.90f));
-    // After rotation the badge is "landscape" — draw text centred in that space
-    g.drawText ("RUBBLESONIC",
-                (int)(r.getCentreX() - r.getHeight() * 0.5f),
-                (int)(r.getCentreY() - r.getWidth() * 0.5f),
-                (int) r.getHeight(), (int) r.getWidth(),
+    const float bw = r.getWidth();
+    const float bh = r.getHeight();
+    g.setColour (CandleColours::badgeHi);
+    g.fillRoundedRectangle (-bw * 0.5f, -bh * 0.5f, bw, bh, 4.0f);
+    g.setColour (juce::Colours::black.withAlpha (0.20f));
+    g.drawRoundedRectangle (-bw * 0.5f, -bh * 0.5f, bw, bh, 4.0f, 1.0f);
+
+    g.setColour (juce::Colour (0xf2373d33));
+    g.fillEllipse (-21.0f, -21.0f, 42.0f, 42.0f);
+    g.setColour (CandleColours::badgeText);
+    g.setFont (lookAndFeel.getGeorgiaFont (16.0f, juce::Font::bold));
+    g.drawText ("rubblesonic", (int) (-bw * 0.5f), -9, (int) bw, 20,
                 juce::Justification::centred);
 }
