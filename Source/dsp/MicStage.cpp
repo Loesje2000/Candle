@@ -1,26 +1,63 @@
 #include "MicStage.h"
 
+namespace
+{
+    // Installs the filter coefficient set for one mic model into the shared
+    // filter banks (swapped on model change; IIR state carries over cleanly).
+    void setModelCoefficients (double sr,
+                               juce::dsp::IIR::Filter<float>* hpf,
+                               juce::dsp::IIR::Filter<float>* presence,
+                               juce::dsp::IIR::Filter<float>* lpf,
+                               juce::dsp::IIR::Filter<float>* cableLP,
+                               int model)
+    {
+        if (model == 1)
+        {
+            // 57: gentle bass shelf, broad 8.2 kHz edge, steep top end
+            const auto lowShelf = juce::dsp::IIR::Coefficients<float>::makeLowShelf (
+                sr, 160.0, 0.707, juce::Decibels::decibelsToGain (-3.0f));
+            const auto peak = juce::dsp::IIR::Coefficients<float>::makePeakFilter (
+                sr, 8200.0, 0.9f, juce::Decibels::decibelsToGain (5.5f));
+            const auto lpfC = juce::dsp::IIR::Coefficients<float>::makeLowPass (sr, 12000.0, 0.707);
+            const auto cabC = juce::dsp::IIR::Coefficients<float>::makeFirstOrderLowPass (sr, 16000.0);
+            for (int ch = 0; ch < 2; ++ch)
+            {
+                *hpf[ch].coefficients      = *lowShelf;
+                *presence[ch].coefficients = *peak;
+                *lpf[ch].coefficients      = *lpfC;
+                *cableLP[ch].coefficients  = *cabC;
+            }
+        }
+        else
+        {
+            // Realistic: 120 Hz HPF, narrow 3.2 kHz honk, 6.5 kHz cliff
+            const auto hpfC = juce::dsp::IIR::Coefficients<float>::makeHighPass (sr, 120.0, 0.707);
+            const auto peak = juce::dsp::IIR::Coefficients<float>::makePeakFilter (
+                sr, 3200.0, 1.4f, juce::Decibels::decibelsToGain (4.0f));
+            const auto lpfC = juce::dsp::IIR::Coefficients<float>::makeLowPass (sr, 6500.0, 0.707);
+            const auto cabC = juce::dsp::IIR::Coefficients<float>::makeFirstOrderLowPass (sr, 10000.0);
+            for (int ch = 0; ch < 2; ++ch)
+            {
+                *hpf[ch].coefficients      = *hpfC;
+                *presence[ch].coefficients = *peak;
+                *lpf[ch].coefficients      = *lpfC;
+                *cableLP[ch].coefficients  = *cabC;
+            }
+        }
+    }
+}
+
 void MicStage::prepare (const juce::dsp::ProcessSpec& spec)
 {
     sampleRate = spec.sampleRate;
-
-    // 2nd-order HPF at 120 Hz (Butterworth Q = 0.707)
-    auto hpfCoeffs = juce::dsp::IIR::Coefficients<float>::makeHighPass (sampleRate, 120.0, 0.707);
-    // Presence peak: +6 dB at 3.8 kHz, Q = 0.85
-    auto presCoeffs = juce::dsp::IIR::Coefficients<float>::makePeakFilter (
-        sampleRate, 3800.0, 0.85f, juce::Decibels::decibelsToGain (6.0f));
-    // 2nd-order LPF at 9 kHz (Butterworth Q = 0.707)
-    auto lpfCoeffs = juce::dsp::IIR::Coefficients<float>::makeLowPass (sampleRate, 9000.0, 0.707);
-    // Cable capacitance: gentle 1st-order LPF at 14 kHz
-    auto cableCoeffs = juce::dsp::IIR::Coefficients<float>::makeFirstOrderLowPass (sampleRate, 14000.0);
-
     for (int ch = 0; ch < 2; ++ch)
     {
-        hpf[ch].prepare (spec);     *hpf[ch].coefficients     = *hpfCoeffs;
-        presence[ch].prepare (spec); *presence[ch].coefficients = *presCoeffs;
-        lpf[ch].prepare (spec);     *lpf[ch].coefficients     = *lpfCoeffs;
-        cableLP[ch].prepare (spec); *cableLP[ch].coefficients = *cableCoeffs;
+        hpf[ch].prepare (spec);
+        presence[ch].prepare (spec);
+        lpf[ch].prepare (spec);
+        cableLP[ch].prepare (spec);
     }
+    lastModel = -1;  // force coefficient install on the first processed block
     reset();
     prepared = true;
 }
@@ -41,6 +78,14 @@ void MicStage::process (juce::AudioBuffer<float>& buffer, const Parameters& p)
 {
     if (! p.enabled || ! prepared) return;
 
+    // Swap filter banks when the mic model changes (0 = Realistic, 1 = 57)
+    const int model = juce::jlimit (0, 1, p.model);
+    if (model != lastModel)
+    {
+        setModelCoefficients (sampleRate, hpf, presence, lpf, cableLP, model);
+        lastModel = model;
+    }
+
     const int   numSamples = buffer.getNumSamples();
     const float sr         = static_cast<float> (sampleRate);
     const float twoPi      = juce::MathConstants<float>::twoPi;
@@ -54,7 +99,9 @@ void MicStage::process (juce::AudioBuffer<float>& buffer, const Parameters& p)
     // quiet passages — exactly how a cheap mic behaves in a real recording context.
     // The cassette stage already supplies the main hiss floor; this just adds a
     // whisper of extra grain on top.
-    constexpr float kNoiseLevel = 0.0014f; // ~–57 dBFS
+    // Realistic: cheap capsule/preamp grain (~-57 dBFS).
+    // 57: professional capsule, far quieter (~-74 dBFS).
+    const float kNoiseLevel = (model == 1) ? 0.0002f : 0.0014f;
 
     // Block RMS for envelope tracking (used to keep noise at a stable absolute level)
     float blockRmsSum = 0.0f;

@@ -13,7 +13,7 @@ constexpr const char* noise       = "noise";
 constexpr const char* wowFlutter  = "wow_flutter";
 constexpr const char* age         = "age";
 constexpr const char* generations = "generations";
-constexpr const char* micOn       = "mic_on";
+constexpr const char* micModel     = "mic_model";
 constexpr const char* outputGain  = "output_gain";
 constexpr const char* globalBypass = "global_bypass";
 }
@@ -78,9 +78,9 @@ static juce::AudioProcessorValueTreeState::ParameterLayout makeLayout()
         juce::NormalisableRange<float> (-12.0f, 12.0f), 0.0f,
         juce::AudioParameterFloatAttributes().withStringFromValueFunction (db)));
 
-    p.push_back (std::make_unique<juce::AudioParameterBool> (
-        juce::ParameterID { ParamID::micOn, 1 }, "Realistic Mic",
-        false, juce::AudioParameterBoolAttributes().withStringFromValueFunction (onoff)));
+    p.push_back (std::make_unique<juce::AudioParameterChoice> (
+        juce::ParameterID { ParamID::micModel, 1 }, "Mic",
+        juce::StringArray { "OFF", "REALISTIC", "57" }, 1));
 
     p.push_back (std::make_unique<juce::AudioParameterBool> (
         juce::ParameterID { ParamID::globalBypass, 1 }, "Bypass",
@@ -191,7 +191,10 @@ void CandleAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
         wasBypassed = false;
     }
 
-    mic.process (buffer, MicStage::Parameters { get (ParamID::micOn) > 0.5f });
+    MicStage::Parameters micParams;
+    micParams.enabled = get (ParamID::micModel) >= 0.5f;   // index 0 = OFF
+    micParams.model   = juce::roundToInt (get (ParamID::micModel)) - 1;
+    mic.process (buffer, micParams);
 
     CassetteTape::Parameters p;
     p.trim        = get (ParamID::trim);
@@ -336,7 +339,7 @@ void CandleAudioProcessor::applyFactoryPreset (int index)
             set (ParamID::saturation, 0.45f); set (ParamID::noise, 0.55f);
             set (ParamID::wowFlutter, 0.30f); set (ParamID::age, 0.30f);
             set (ParamID::generations, 1.0f); set (ParamID::eqLow, -1.5f);
-            set (ParamID::micOn, 1.0f);
+            set (ParamID::micModel, 1.0f);   // REALISTIC
             break;
         case 1: // Porta: DBX on, HIGH speed, clean cassette
             set (ParamID::tapeSpeed, 0.0f);   set (ParamID::saturation, 0.3f);

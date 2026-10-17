@@ -35,7 +35,7 @@ private:
 
     // ── MIXER panel controls ──────────────────────────────────────────────
     std::unique_ptr<CandleKnob> knobEqHigh, knobEqLow, knobTrim;
-    juce::ToggleButton micButton { "REALISTIC" };
+    juce::ComboBox     micCombo;
 
     // ── TAPE panel controls ───────────────────────────────────────────────
     juce::ToggleButton dbxButton  { "DBX" };
@@ -59,7 +59,8 @@ private:
     // ── APVTS Attachments ─────────────────────────────────────────────────
     using BtnAtt = juce::AudioProcessorValueTreeState::ButtonAttachment;
     using CmbAtt = juce::AudioProcessorValueTreeState::ComboBoxAttachment;
-    std::unique_ptr<BtnAtt> micAtt, dbxAtt, bypassAtt;
+    std::unique_ptr<CmbAtt> micAtt;
+    std::unique_ptr<BtnAtt> dbxAtt, bypassAtt;
     std::unique_ptr<CmbAtt> speedAtt, genAtt;
 
     // ── Preset list (factory + user presets, unified for combo + arrows) ──

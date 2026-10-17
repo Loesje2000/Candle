@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="Cndl01" name="Candle" projectType="audioplug" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" version="0.1.0"
+              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" version="0.1.2"
               companyName="Rubblesonic" companyCopyright="Rubblesonic 2026"
               companyWebsite="https://rubblesonic.com" bundleIdentifier="com.rubblesonic.candle"
               pluginName="Candle" pluginDesc="Porta 424 cassette processor"

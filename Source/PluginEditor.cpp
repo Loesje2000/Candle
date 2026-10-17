@@ -31,10 +31,11 @@ CandleAudioProcessorEditor::CandleAudioProcessorEditor (CandleAudioProcessor& p)
     for (auto* k : { knobTrim.get(), knobEqHigh.get(), knobEqLow.get() })
         root.addAndMakeVisible (*k);
 
-    micButton.setClickingTogglesState (true);
-    micButton.setTooltip ("RadioShack Realistic mic emulation (Elliott Smith vocal character)");
-    micAtt = std::make_unique<BtnAtt> (processor.apvts, "mic_on", micButton);
-    root.addAndMakeVisible (micButton);
+    micCombo.addItem ("OFF", 1);
+    micCombo.addItem ("REALISTIC", 2);
+    micCombo.addItem ("57", 3);
+    micAtt = std::make_unique<CmbAtt> (processor.apvts, "mic_model", micCombo);
+    root.addAndMakeVisible (micCombo);
 
     // ── TAPE controls ─────────────────────────────────────────────────────
     dbxButton.setClickingTogglesState (true);
@@ -146,8 +147,9 @@ CandleAudioProcessorEditor::CandleAudioProcessorEditor (CandleAudioProcessor& p)
     knobTrim->setTooltip   ("Input trim - set recording level before the tape chain (+/-20 dB)");
     knobEqHigh->setTooltip ("Mixer high shelf - boosts or cuts above 10 kHz before tape (+/-10 dB)");
     knobEqLow->setTooltip  ("Mixer low shelf - boosts or cuts below 100 Hz before tape (+/-10 dB)");
-    micButton.setTooltip   ("RadioShack Realistic mic emulation - shapes tone like the cheap "
-                            "dynamic mic Elliott Smith used for vocals on Candle");
+    micCombo.setTooltip    ("Mic model - OFF bypasses the mic stage, REALISTIC is the cheap "
+                            "RadioShack dynamic Smith sang through on Candle, 57 is the "
+                            "classic dynamic workhorse also used on Roman Candle");
     dbxButton.setTooltip   ("DBX Type II noise reduction - on = quieter hiss, off = raw open-reel "
                             "noise floor (Smith often bypassed or had a faulty DBX)");
     speedCombo.setTooltip  ("Tape speed - HIGH (3-3/4 ips) is cleanest, NORM (1-7/8 ips) is the "
@@ -405,7 +407,7 @@ void CandleAudioProcessorEditor::resized()
     knobEqLow->setBounds  (eqGap * 2 + kSmKnob, eqY, kSmKnob, kSmKnob + 14);
 
     const int micY = eqY + kSmKnob + 14 + 10;
-    micButton.setBounds (10, micY, kMixW - 20, 22);
+    micCombo.setBounds  (10, micY, kMixW - 20, 22);
 
     // ── TAPE controls row 1: DBX  SPEED  GEN ─────────────────────────────
     const int row1Y = kBodyY + 36;

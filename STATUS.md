@@ -1,8 +1,43 @@
 # Candle Status
 
-Updated: 2026-07-09
+Updated: 2026-10-17 (v0.1.2)
 
-## Built This Session
+## This Session (v0.1.2)
+
+- Renamed the SM57 mic model to just "57" in the plugin UI and scrubbed the
+  brand name from source comments/tooltips (legal reasons). Saved states are
+  unaffected (choice params store the index, not the label).
+- Version bumped 0.1.1 → 0.1.2, project re-saved, all Release targets rebuilt
+  (0 errors), `auval -v aufx CNDL RUBS` PASSED.
+- Re-installed Release builds via `ditto` (AU + VST3 in `~/Library/Audio/Plug-Ins/`,
+  Standalone in `/Applications`), all verified 0.1.2 and signed.
+- REAPER plugin caches cleared again before install (backups:
+  `.candle-cache-clean-20261017-214939`).
+
+## v0.1.1 (same day)
+
+- Version bumped 0.1.0 → 0.1.1 in `Candle.jucer`; project re-saved with Projucer 8.0.14
+  (also bumped `JUCE_PROJUCER_VERSION` 0x8000d → 0x8000e, fixing the build against the
+  installed JUCE 8.0.14).
+- Rebuilt all Release targets successfully; AU validation (`auval -v aufx CNDL RUBS`) PASSED.
+- Installed Release builds:
+  - AU: `~/Library/Audio/Plug-Ins/Components/Candle.component` (0.1.1, signed, universal)
+  - VST3: `~/Library/Audio/Plug-Ins/VST3/Candle.vst3` (0.1.1, signed, universal)
+  - Standalone: `/Applications/Candle.app` (0.1.1, signed, universal)
+  - NOTE: use `ditto`, not `cp -R`, for bundle installs — `cp -R` silently produced a
+    partial copy (missing Info.plist) this session.
+- Cleared REAPER plugin caches before install (timestamped backups kept in the REAPER
+  folder, pattern `.candle-cache-clean-20261017-182704`):
+  `reaper-auplugins_arm64.ini`, `reaper-vstplugins_arm64.ini`. REAPER will rescan on
+  next launch.
+- MicStage: retuned the Realistic model (was piercingly bright — see
+  `docs/research-notes.md` §1) and added an SM57 model behind a new `mic_model`
+  choice parameter (OFF / REALISTIC / SM57, default REALISTIC). The old `mic_on`
+  bool parameter was removed — old sessions/presets will drop it.
+- Modeling provenance audit: nothing in the DSP was measured; all values are by-ear
+  estimates. Research notes + next steps are in `docs/research-notes.md`.
+
+## Previous Session (2026-07-09)
 
 - Reworked the GUI to a warmer "BuckleyHaze"-style chassis theme (`CandleLookAndFeel.h/.cpp`, `CandleKnob.cpp`):
   - New amber/cream/warm-brown colour palette.
